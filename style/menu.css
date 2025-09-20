@@ -21,10 +21,11 @@ body {
   border: 1px solid #333;
   border-radius: 20px;
   width: 100%;
-  max-width: 1200px;
-  min-height: 600px;
+  max-width: 1440px;
+  min-height: 810px;
   display: flex;
   overflow: hidden;
+  box-shadow: 0 0 10px rgba(106, 79, 204, 0.6), 0 0 20px rgba(79, 5, 94, 0.4);
 }
 
 /* Left Side - Navigation */
@@ -38,16 +39,16 @@ body {
   padding: 80px 40px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  border-right: 1px solid #333;
+  background-color: #0063ff;
   align-items: center;
   text-align: center;
-  border-right: 1px solid #333;
 }
 
 .logo {
   font-family: "Rubik Mono One", monospace;
-  font-size: 28px;
-  color: #0063ff;
+  font-size: 50px;
+  color: #fff;
   margin-bottom: 60px;
 }
 
@@ -55,54 +56,55 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  margin-top: auto; /* Đẩy nav xuống dưới cùng */
+  margin-top: 50px; /* Đẩy nav xuống dưới cùng */
 }
 
 .footer-nav a {
   color: #aaa;
   text-decoration: none;
-  font-size: 16px;
+  font-size: 55px;
   transition: color 0.3s;
-  padding: 8px 0;
 }
 
 .footer-nav a:hover {
-  color: #0063ff;
+  color: #fff;
 }
 
 /* Right Side - Content */
 .right-side .form-container {
-  width: 70%;
+  width: 90%;
   padding: 80px 40px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+  justify-content: start;
+  align-items: start;
+  text-align: start;
+  margin-top: 140px;
 }
 .right-side .out {
   display: flex;
-  justify-content: flex-end; /* Canh phải */
-  top: 20px; /* Giảm khoảng cách từ top */
-  right: 20px; /* Giảm khoảng cách từ right */
+  justify-content: flex-end;
+  top: 20px;
+  right: 20px;
   text-decoration: none;
   transition: color 0.3s;
   padding: 10px 20px;
 }
 .headline {
   font-family: "Epilogue", sans-serif;
-  font-size: 3.5rem;
-  font-weight: 700;
-  color: #0063ff;
-  line-height: 1.2;
-  margin-bottom: 20px;
+  font-weight: 400;
+  font-size: 16px;
+  color: #aaa;
+  margin-bottom: 10px;
 }
 
 .subheadline {
-  font-size: 1.5rem;
-  color: #aaa;
-  margin-bottom: 40px;
-  max-width: 400px;
+  font-family: "Epilogue", sans-serif;
+  font-size: 55px;
+  font-weight: 400;
+  color: #0063ff;
+  line-height: 1.2;
+  margin-bottom: 20px;
 }
 
 /* Sign Up Button */
@@ -111,7 +113,7 @@ body {
   color: white;
   border: none;
   border-radius: 30px;
-  padding: 18px 50px;
+  padding: 9px 25px;
   font-size: 1.2rem;
   font-weight: 500;
   cursor: pointer;
