@@ -25,7 +25,7 @@ body {
   min-height: 810px;
   display: flex;
   overflow: hidden;
-  box-shadow: 0 0 10px rgba(106, 79, 204, 0.6), 0 0 20px rgba(79, 5, 94, 0.4);
+  box-shadow: 0 0 10px rgba(150, 35, 136, 0.826), 0 0 20px rgba(98, 2, 118, 0.4);
 }
 
 /* Left Side - Navigation */
