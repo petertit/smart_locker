@@ -11,7 +11,7 @@ function WhatWeDo() {
   ];
 
   const imageMap = {
-    "Face ID": "./design/SOURCE_IMAGE/faceid.jpg",
+    Face_ID: "./design/SOURCE_IMAGE/faceid.jpg",
     Tracking: "./design/SOURCE_IMAGE/tracking.jpg",
     SmartKey: "./design/SOURCE_IMAGE/3ab22c03a786bba289ba84a859ca6a16.jpg",
     Remote: "./design/SOURCE_IMAGE/remote.jpg",
@@ -65,4 +65,3 @@ function WhatWeDo() {
     </section>
   );
 }
-export default WhatWeDo;

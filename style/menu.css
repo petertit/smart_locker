@@ -1,0 +1,154 @@
+/* Reset CSS */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #000;
+  color: #fff;
+  font-family: "Rubik", sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+/* Container với border */
+.container {
+  border: 1px solid #333;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 1200px;
+  min-height: 600px;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Left Side - Navigation */
+.left-side {
+  /* width: 30%;
+  padding: 40px;
+  
+  display: flex;
+  flex-direction: column; */
+  width: 70%;
+  padding: 80px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border-right: 1px solid #333;
+}
+
+.logo {
+  font-family: "Rubik Mono One", monospace;
+  font-size: 28px;
+  color: #0063ff;
+  margin-bottom: 60px;
+}
+
+.footer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: auto; /* Đẩy nav xuống dưới cùng */
+}
+
+.footer-nav a {
+  color: #aaa;
+  text-decoration: none;
+  font-size: 16px;
+  transition: color 0.3s;
+  padding: 8px 0;
+}
+
+.footer-nav a:hover {
+  color: #0063ff;
+}
+
+/* Right Side - Content */
+.right-side .form-container {
+  width: 70%;
+  padding: 80px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.right-side .out {
+  display: flex;
+  justify-content: flex-end; /* Canh phải */
+  top: 20px; /* Giảm khoảng cách từ top */
+  right: 20px; /* Giảm khoảng cách từ right */
+  text-decoration: none;
+  transition: color 0.3s;
+  padding: 10px 20px;
+}
+.headline {
+  font-family: "Epilogue", sans-serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #0063ff;
+  line-height: 1.2;
+  margin-bottom: 20px;
+}
+
+.subheadline {
+  font-size: 1.5rem;
+  color: #aaa;
+  margin-bottom: 40px;
+  max-width: 400px;
+}
+
+/* Sign Up Button */
+.signup-btn {
+  background: #0063ff;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 18px 50px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.signup-btn:hover {
+  background: #0051d4;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .left-side,
+  .right-side {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #333;
+  }
+
+  .headline {
+    font-size: 2.5rem;
+  }
+
+  .subheadline {
+    font-size: 1.2rem;
+  }
+
+  .footer-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 40px;
+  }
+}

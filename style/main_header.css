@@ -1,0 +1,19 @@
+.menu {
+  display: flex;
+  justify-content: space-between; /* đẩy 2 bên */
+  align-items: center;
+  margin-top: 50px;
+}
+.icon_menu {
+  display: block;
+  margin-bottom: 30px;
+  cursor: pointer;
+}
+
+h2 {
+  font-family: "Rubik Mono One", monospace;
+  font-weight: bold;
+  font-size: 28px;
+  color: #0063ff;
+  margin: 0;
+}
