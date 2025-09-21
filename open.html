@@ -13,10 +13,8 @@
     <title>Register - Start Your Journey</title>
     <!-- css -->
     <link rel="stylesheet" href="style/main_header.css" />
-    <link rel="stylesheet" href="./style/register.css" />
     <link rel="stylesheet" href="./style/main_footer.css" />
-  </head>
-  <body>
+    <link rel="stylesheet" href="./style/open.css" />
     <!-- menu -->
     <div class="menu">
       <h2>F-LOCK</h2>
@@ -30,70 +28,47 @@
     </div>
     <hr />
     <div class="header">
-      <p id="row1">Register</p>
-      <h1>Ready to take the next step?</h1>
+      <p id="row1">Work</p>
+      <h1>Open Locker</h1>
 
-      <p id="row3">Fill out the form to start your journey with us</p>
+      <p id="row3">
+        Please keep your face in position for recognition scanning
+      </p>
     </div>
-    <!-- Container chính -->
-    <div class="register-container">
-      <!-- Bên trái: Ảnh -->
-      <div class="left-side">
-        <img src="./design/SOURCE_IMAGE/scan.jpg" alt="Scan Face" />
-      </div>
-
-      <!-- Bên phải: Form -->
-      <div class="right-side">
-        <form id="registerForm">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="name">Name</label>
-              <input type="text" id="name" name="name" required />
-            </div>
-
-            <div class="form-group">
-              <label for="email">Email</label>
-              <input type="email" id="email" name="email" required />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="phone">Phone Number</label>
-              <input type="tel" id="phone" name="phone" required />
-            </div>
-
-            <div class="form-group">
-              <label for="password">Password</label>
-              <input type="password" id="password" name="password" required />
-            </div>
-          </div>
-
-          <div class="form-group full">
-            <label for="hint">Hint Password</label>
-            <input
-              type="text"
-              id="hint"
-              name="hint"
-              placeholder="Write your password hint.."
-            />
-          </div>
-
-          <div class="captcha">
-            <input type="checkbox" id="captcha" name="captcha" required />
-            <label for="captcha">I'm not a robot</label>
-          </div>
-
-          <button type="submit" class="btn">SAVE</button>
-          <p class="login-hint">
-            If you already have an account, please click
-            <a href="menu.html">log on</a>
-          </p>
-        </form>
+  </head>
+  <body>
+    <!-- Content -->
+    <div class="face-grid-section">
+      <div class="grid-container">
+        <a href="scan.html" class="grid-item">
+          <span>01</span>
+        </a>
+        <a href="scan.html" class="grid-item">
+          <span>02</span>
+        </a>
+        <a href="scan.html" class="grid-item">
+          <span>03</span>
+        </a>
+        <a href="scan.html" class="grid-item">
+          <span>04</span>
+        </a>
+        <a href="scan.html" class="grid-item">
+          <span>05</span>
+        </a>
+        <a href="scan.html" class="grid-item">
+          <span>06</span>
+        </a>
+        <a href="scan.html" class="grid-item">
+          <span>07</span>
+        </a>
+        <a href="scan.html" class="grid-item">
+          <span>08</span>
+        </a>
+        <a href="scan.html" class="grid-item">
+          <span>09</span>
+        </a>
       </div>
     </div>
-
-    <script src="./animation/register.jsx"></script>
   </body>
   <!-- footer -->
   <footer class="footer">
