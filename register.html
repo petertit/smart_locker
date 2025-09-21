@@ -28,34 +28,54 @@
       </a>
     </div>
     <hr />
-    <div class="container">
-      <div class="header">
-        <h1>Register</h1>
-        <p>Ready to take the next step?</p>
-        <p>Fill out the form to start your journey with us</p>
+    <div class="header">
+      <p id="row1">Register</p>
+      <h1>Ready to take the next step?</h1>
+
+      <p id="row3">Fill out the form to start your journey with us</p>
+    </div>
+    <!-- Container chính -->
+    <div class="register-container">
+      <!-- Bên trái: Ảnh -->
+      <div class="left-side">
+        <img src="./design/SOURCE_IMAGE/scan.jpg" alt="Scan Face" />
       </div>
 
-      <div class="form-container">
+      <!-- Bên phải: Form -->
+      <div class="right-side">
         <form id="registerForm">
-          <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" required />
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Name</label>
+              <input type="text" id="name" name="name" required />
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" required />
+            </div>
           </div>
 
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required />
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input type="tel" id="phone" name="phone" required />
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="password" id="password" name="password" required />
+            </div>
           </div>
 
-          <div class="form-group">
-            <label for="phone">Phone Number</label>
-            <input type="tel" id="phone" name="phone" required />
-          </div>
-
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required />
-            <p class="password-hint">Write your password hint.</p>
+          <div class="form-group full">
+            <label for="hint">Hint Password</label>
+            <input
+              type="text"
+              id="hint"
+              name="hint"
+              placeholder="Write your password hint.."
+            />
           </div>
 
           <div class="captcha">
@@ -63,13 +83,50 @@
             <label for="captcha">I'm not a robot</label>
           </div>
 
-          <button type="submit" class="btn">Create Account</button>
+          <button type="submit" class="btn">SAVE</button>
+          <p class="login-hint">
+            If you already have an account, please click
+            <a href="menu.html">log on</a>
+          </p>
         </form>
       </div>
-
-      <div class="footer">Already have an account? <a href="#">Sign In</a></div>
     </div>
 
     <script src="./animation/register.jsx"></script>
   </body>
+  <!-- footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-left">
+        <h2 id="end_F">F-LOCK</h2>
+        <p>
+          Tủ khóa thông minh của chúng tôi mang đến sự an toàn và tiện lợi. Hãy
+          biến việc lưu trữ hằng ngày thành một trải nghiệm thông minh và bảo
+          mật hơn!
+        </p>
+        <nav class="footer-nav">
+          <a href="#">Home</a>
+          <a href="#">User Guide</a>
+          <a href="#">Open Locker</a>
+          <a href="#">About</a>
+        </nav>
+      </div>
+
+      <div class="footer-right">
+        <p>
+          Are you ready to unlock a smarter and more secure experience with our
+          device?
+        </p>
+        <p>
+          Drop us a line at <br />
+          <a href="mailto:aicungvay321@gmail.com" class="email-link">
+            aicungvay321@gmail.com
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <hr class="footer-line" />
+    <p class="copyright">© 2025 F-LOCK. All rights reserved.</p>
+  </footer>
 </html>
