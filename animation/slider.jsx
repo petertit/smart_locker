@@ -29,16 +29,14 @@ document.addEventListener("DOMContentLoaded", () => {
     else track.style.transition = "transform 0.5s ease";
 
     const viewportWidth = viewport.offsetWidth;
-
-    // lấy kích thước thực của slide active
     const activeSlide = allSlides[currentIndex];
-    const slideWidth = activeSlide.offsetWidth + GAP;
 
-    // tính lại center dựa trên index
-    const centerOfCurrent =
-      currentIndex * slideWidth + activeSlide.offsetWidth / 2;
+    // offsetLeft của slide active
+    const activeLeft = activeSlide.offsetLeft;
+    const activeWidth = activeSlide.offsetWidth;
 
-    let offsetX = viewportWidth / 2 - centerOfCurrent;
+    // tính dịch chuyển để slide active ra giữa
+    const offsetX = viewportWidth / 2 - (activeLeft + activeWidth / 2);
 
     track.style.transform = `translateX(${offsetX}px)`;
     setActive();

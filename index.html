@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="style/main_footer.css" />
     <link rel="stylesheet" href="style/main_slide.css" />
     <link rel="stylesheet" href="style/main_header.css" />
+    <link rel="stylesheet" href="style/main_whatwedo.css" />
 
     <title>Locker Web</title>
   </head>
@@ -22,21 +23,26 @@
   <!-- BODY -->
   <body>
     <!-- menu -->
-    <div class="menu">
-      <h2>F-LOCK</h2>
-      <a href="./menu.html">
-        <img
-          src="./design/SOURCE_IMAGE/Menu.png"
-          alt="menu"
-          class="icon_menu"
-        />
-      </a>
-    </div>
-    <hr />
+      <section class="o">
+        <div class="menu">
+        <h2>F-LOCK</h2>
+        <a href="./menu.html">
+          <img
+            src="./design/SOURCE_IMAGE/Menu.png"
+            alt="menu"
+            class="icon_menu"
+          />
+        </a>
+        </div>
+    </section>
+        
     <!-- content -->
-    <p id="title">SMART-BOX <br />HỆ THỐNG TỦ<br />THÔNG MINH</p>
+     <div class="whoweare">
+      <hr /><p id="title">SMART-BOX <br />HỆ THỐNG TỦ<br />THÔNG MINH</p>
     <p id="wwa">WHO WE ARE</p>
-    <hr />
+  <hr /></div>
+    
+    
 
     <div class="content">
       <p class="description">
@@ -79,50 +85,34 @@
 </section>
 
 
-    <!-- what we do -->
-    <section class="what-we-do">
-      <div class="header-row">
-        <h2>WHAT WE DO</h2>
-        <div class="button-group">
-          <div class="row">
-            <button>Face ID</button>
-            <button>Tracking</button>
-          </div>
-          <div>
-            <button>SmartKey</button>
-            <button>Remote</button>
-          </div>
-        </div>
-      </div>
+ <section class="what-we-do">
+  <div class="what-we-do-header">
+    <h2>WHAT WE DO</h2>
+    <div class="button-grid">
+      <button id="faceid-btn">Face ID</button>
+      <button id="tracking-btn">Tracking</button>
+      <button id="smartkey-btn">SmartKey</button>
+      <button id="remote-btn">Remote</button>
+    </div>
+  </div>
 
-      <div class="content-row">
-        <ul class="features">
-          <li>
-            <span class="number">01</span>
-            Facial Recognition Access<span class="arrow">➜</span>
-          </li>
-          <li>
-            <span class="number">02</span>
-            Smartkey Management <span class="arrow">➜</span>
-          </li>
-          <li>
-            <span class="number">03</span>
-            Data & Activity Tracking<span class="arrow">➜</span>
-          </li>
-          <li>
-            <span class="number">04</span>
-            Remote Control & Alerts<span class="arrow">➜</span>
-          </li>
-        </ul>
+  <div class="what-we-do-content">
+    <ul>
+      <li><span class="num">01</span><span class="text">Facial Recognition Access</span></li>
+      <li><span class="num">02</span><span class="text">Smartkey Management</span></li>
+      <li><span class="num">03</span><span class="text">Data & Activity Tracking</span></li>
+      <li><span class="num">04</span><span class="text">Remote Control & Alerts</span></li>
+    </ul>
 
-        <div class="feature-image">
-          <img
-            src="./design/SOURCE_IMAGE/3ab22c03a786bba289ba84a859ca6a16.jpg"
-            alt="SmartKey Image"
-          />
-        </div>
-      </div>
-    </section>
+    <div class="img-placeholder">
+      <img class="rotated-image" src="images/Faceid-01.png" alt="Design">
+    </div>
+  </div>
+</section>
+
+    <!-- include JS ở cuối body -->
+<script src="./animation/WhatWeDo.jsx"></script>
+
 
     <!-- slide -->
    <section class="location-slider">
@@ -166,9 +156,9 @@
         </p>
         <nav class="footer-nav">
           <a href="#">Home</a>
-          <a href="#">User Guide</a>
-          <a href="#">Open Locker</a>
-          <a href="#">About</a>
+          <a href="guild.html">User Guide</a>
+          <a href="open.html">Open Locker</a>
+          <a href="about_us.html">About</a>
         </nav>
       </div>
 
