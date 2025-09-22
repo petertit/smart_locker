@@ -1,0 +1,165 @@
+/* ==================== MOBILE ==================== */
+@media (max-width: 767px) {
+  body {
+    padding: 0 20px;
+  }
+
+  /* Menu */
+  .menu {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .button-group {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Register */
+  .register-container {
+    flex-direction: column;
+    max-width: 100%;
+    max-height: none;
+  }
+  .register-container .left-side img {
+    max-width: 250px;
+  }
+  .subheadline {
+    font-size: 32px;
+  }
+
+  /* Slider */
+  .slider-viewport {
+    max-width: 100%;
+  }
+  .slide {
+    width: 90%;
+    height: auto;
+    margin: 0 auto;
+  }
+  .slide .overlay h2 {
+    font-size: 36px;
+  }
+
+  /* What We Do */
+  .what-we-do h2 {
+    font-size: 32px;
+  }
+  .what-we-do ul li {
+    font-size: 22px;
+  }
+  .img-placeholder img {
+    width: 180px;
+  }
+
+  /* Guild */
+  .main-heading {
+    font-size: 24px;
+  }
+  .video-frame {
+    width: 100%;
+  }
+  .card-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .card {
+    width: 100%;
+    height: auto;
+  }
+
+  /* About Us */
+  .team-grid {
+    grid-template-columns: 1fr; /* 1 cột */
+    gap: 20px;
+  }
+  .team-card {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Footer */
+  .footer-content {
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+
+/* ==================== TABLET ==================== */
+@media (min-width: 768px) and (max-width: 1023px) {
+  body {
+    padding: 0 40px;
+  }
+
+  /* Menu */
+  .menu {
+    gap: 40px;
+  }
+
+  /* Register */
+  .register-container {
+    flex-direction: column;
+    max-width: 700px;
+  }
+  .subheadline {
+    font-size: 40px;
+  }
+
+  /* Slider */
+  .slider-viewport {
+    max-width: 100%;
+  }
+  .slide {
+    width: 60%;
+    height: auto;
+  }
+  .slide .overlay h2 {
+    font-size: 56px;
+  }
+
+  /* What We Do */
+  .what-we-do h2 {
+    font-size: 40px;
+  }
+  .what-we-do ul li {
+    font-size: 28px;
+  }
+
+  /* Guild */
+  .main-heading {
+    font-size: 28px;
+  }
+  .video-frame {
+    width: 100%;
+  }
+  .card-container {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+  }
+  .card {
+    width: 45%;
+  }
+
+  /* About Us */
+  .team-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 cột */
+    gap: 30px;
+  }
+  .team-card {
+    width: 100%;
+  }
+
+  /* Footer */
+  .footer-content {
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+}
+
+/* ==================== DESKTOP ==================== */
+@media (min-width: 1024px) {
+  /* About Us giữ 4 cột */
+  .team-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
