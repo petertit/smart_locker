@@ -154,33 +154,3 @@ hr {
   font-size: 30px;
   color: white;
 }
-/* Mobile */
-@media (max-width: 767px) {
-  .card-container {
-    flex-direction: column;
-    gap: 20px;
-  }
-  .card {
-    width: 100%;
-    height: auto;
-  }
-}
-
-/* Tablet */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .card-container {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .card {
-    width: 45%;
-  }
-}
-
-/* Desktop */
-@media (min-width: 1024px) {
-  .card {
-    width: 300px;
-    height: 550px;
-  }
-}
