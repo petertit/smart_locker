@@ -150,7 +150,7 @@
 /* ===== Image absolute ===== */
 .img-placeholder {
   position: absolute;
-  right: 0;
+  right: 80px;
   top: 50%;
   transform: translateY(-50%); /* luôn căn giữa dọc */
   z-index: 2;
