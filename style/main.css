@@ -7,6 +7,16 @@ body {
 }
 .whoweare {
   padding: 0px 130px;
+  margin-bottom: 20px;
+  font-family: "Epilogue", sans-serif;
+  font-weight: 700;
+  font-size: 60px;
+  font-style: normal;
+  color: #0063ff;
+  text-align: left;
+  font-weight: 700;
+  color: #0063ff;
+  margin-bottom: 16px;
 }
 #title {
   font-family: "Epilogue", sans-serif;
@@ -18,17 +28,7 @@ body {
   margin-bottom: 400px;
   margin-top: 0;
 }
-#wwa {
-  font-family: "Epilogue", sans-serif;
-  font-weight: 700;
-  font-size: 60px;
-  font-style: normal;
-  color: #0063ff;
-  text-align: left;
-  font-weight: 700;
-  color: #0063ff;
-  margin-bottom: 16px;
-}
+
 hr {
   border: none;
   border-top: 1px solid #333;
@@ -41,6 +41,7 @@ hr {
   align-items: center;
   gap: 40px; /* khoảng cách giữa description và info */
   padding: 0px 130px;
+  margin-bottom: 40px;
 }
 
 .description {
