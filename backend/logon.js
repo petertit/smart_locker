@@ -25,16 +25,3 @@ document
       alert("❌ Error: " + err.message);
     }
   });
-
-// ===== Bảo vệ các trang =====
-(function protectPages() {
-  const openPages = ["index.html", "register.html", "logon.html"];
-  const current = window.location.pathname.split("/").pop();
-  if (!openPages.includes(current)) {
-    const user = sessionStorage.getItem("user");
-    if (!user) {
-      alert("⚠️ Please login first!");
-      window.location.href = "logon.html";
-    }
-  }
-})();
