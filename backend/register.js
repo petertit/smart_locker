@@ -17,23 +17,27 @@ document
 
     try {
       const res = await fetch(
-        "https://smart-locker-backend.onrender.com/register",
+        "https://smart-locker-kgnx.onrender.com/register",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: name, email, password }),
+          body: JSON.stringify({
+            username: name,
+            email,
+            password,
+          }),
         }
       );
 
       const data = await res.json();
       if (res.ok) {
-        alert("✅ Register successful! Please log in.");
+        alert("✅ Đăng ký thành công!");
         window.location.href = "logon.html"; // chuyển sang trang login
       } else {
-        alert("❌ " + data.error);
+        alert("❌ Lỗi: " + data.error);
       }
     } catch (err) {
-      alert("❌ Error: " + err.message);
+      alert("❌ Fetch error: " + err.message);
     }
   });
 
