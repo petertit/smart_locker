@@ -1,8 +1,7 @@
 // auth_protect.js
-
 (function protectPages() {
-  // Danh sách các trang KHÔNG cần login
-  const openPages = ["index.html", "register.html", "logon.html"];
+  // Chỉ cho phép mở 2 trang này khi chưa login
+  const openPages = ["logon.html", "register.html"];
 
   // Lấy tên file hiện tại
   const current = window.location.pathname.split("/").pop();

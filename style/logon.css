@@ -119,3 +119,20 @@ body {
 .login-container .btn:hover {
   background-color: #0051d4;
 }
+/* Link dưới form login */
+.login-container .register-link {
+  margin-top: 20px;
+  font-size: 14px;
+  text-align: center;
+  color: #aaa;
+}
+
+.login-container .register-link a {
+  color: #0063ff; /* xanh nổi bật */
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-container .register-link a:hover {
+  text-decoration: underline;
+}
