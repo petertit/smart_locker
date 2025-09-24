@@ -7,7 +7,7 @@ document
     const password = document.getElementById("password").value;
 
     try {
-      const res = await fetch("http://localhost:4000/login", {
+      const res = await fetch("https://smart-locker-kgnx.onrender.com/logon", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

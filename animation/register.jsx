@@ -14,11 +14,14 @@ document
     }
 
     try {
-      const res = await fetch("http://localhost:4000/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: name, email, password }),
-      });
+      const res = await fetch(
+        "https://smart-locker-kgnx.onrender.com/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: name, email, password }),
+        }
+      );
 
       const data = await res.json();
       if (res.ok) {
