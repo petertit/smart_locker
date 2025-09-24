@@ -1,32 +1,29 @@
-// logon.js
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector("form");
 
-document
-  .getElementById("loginForm")
-  .addEventListener("submit", async function (e) {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    const email = document.querySelector('input[name="email"]').value;
+    const password = document.querySelector('input[name="password"]').value;
 
     try {
-      const res = await fetch(
-        "https://smart-locker-backend.onrender.com/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      const res = await fetch("https://smart-locker-kgnx.onrender.com/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
       const data = await res.json();
       if (res.ok) {
-        alert("✅ Login successful!");
-        sessionStorage.setItem("user", JSON.stringify(data.user));
-        window.location.href = "index.html"; // sau khi login về trang chính
+        alert("✅ Đăng nhập thành công!");
+        localStorage.setItem("user", JSON.stringify(data.user)); // lưu user
+        window.location.href = "index.html"; // quay về trang chính
       } else {
-        alert("❌ " + data.error);
+        alert("❌ Lỗi: " + data.error);
       }
     } catch (err) {
-      alert("❌ Error: " + err.message);
+      alert("❌ Fetch error: " + err.message);
     }
   });
+});

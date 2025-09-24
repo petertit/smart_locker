@@ -1,19 +1,14 @@
 // register.js
 
-document
-  .getElementById("registerForm")
-  .addEventListener("submit", async function (e) {
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector("form");
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-    const captcha = document.getElementById("captcha").checked;
-
-    if (!name || !email || !password || !captcha) {
-      alert("⚠️ Please fill all required fields and verify captcha.");
-      return;
-    }
+    const name = document.querySelector('input[name="name"]').value;
+    const email = document.querySelector('input[name="email"]').value;
+    const password = document.querySelector('input[name="password"]').value;
 
     try {
       const res = await fetch(
@@ -21,18 +16,14 @@ document
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: name,
-            email,
-            password,
-          }),
+          body: JSON.stringify({ username: name, email, password }),
         }
       );
 
       const data = await res.json();
       if (res.ok) {
         alert("✅ Đăng ký thành công!");
-        window.location.href = "logon.html"; // chuyển sang trang login
+        window.location.href = "logon.html"; // chuyển sang login
       } else {
         alert("❌ Lỗi: " + data.error);
       }
@@ -40,6 +31,7 @@ document
       alert("❌ Fetch error: " + err.message);
     }
   });
+});
 
 // Hiệu ứng input giữ nguyên
 document.querySelectorAll(".input").forEach((inputEl) => {
