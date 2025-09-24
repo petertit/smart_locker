@@ -1,32 +1,45 @@
 document
   .getElementById("registerForm")
-  .addEventListener("submit", function (e) {
+  .addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    // Basic validation
     const name = document.getElementById("name").value;
     const email = document.getElementById("email").value;
-    const phone = document.getElementById("phone").value;
     const password = document.getElementById("password").value;
     const captcha = document.getElementById("captcha").checked;
 
-    if (!name || !email || !phone || !password) {
-      alert("Please fill in all required fields.");
+    if (!name || !email || !password || !captcha) {
+      alert("⚠️ Please fill all required fields and verify captcha.");
       return;
     }
 
-    if (!captcha) {
-      alert("Please verify that you are not a robot.");
-      return;
-    }
+    try {
+      const res = await fetch("http://localhost:4000/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: name, email, password }),
+      });
 
-    // Email validation
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-      alert("Please enter a valid email address.");
-      return;
+      const data = await res.json();
+      if (res.ok) {
+        alert("✅ Register successful! Please log in.");
+        window.location.href = "logon.html";
+      } else {
+        alert("❌ " + data.error);
+      }
+    } catch (err) {
+      alert("❌ Error: " + err.message);
     }
-
-    // If all validations pass
-    alert("Thank you for registering! We will be in touch soon.");
   });
+
+// Giữ hiệu ứng ban đầu cho input
+document.querySelectorAll(".input").forEach((inputEl) => {
+  inputEl.addEventListener("focus", () => {
+    inputEl.parentNode.classList.add("active");
+  });
+  inputEl.addEventListener("blur", () => {
+    if (!inputEl.value) {
+      inputEl.parentNode.classList.remove("active");
+    }
+  });
+});
