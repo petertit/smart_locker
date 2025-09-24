@@ -11,8 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
-    // Xử lý logout
-    formContainer.querySelector(".logout-btn").addEventListener("click", () => {
+    // Thêm sự kiện cho nút Log Out
+    document.getElementById("logout-btn").addEventListener("click", () => {
       localStorage.removeItem("user");
       window.location.href = "logon.html";
     });
