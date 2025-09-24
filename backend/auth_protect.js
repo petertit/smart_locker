@@ -1,7 +1,7 @@
 (function protectPages() {
   const openPages = ["logon.html", "register.html"];
   const current = window.location.pathname.split("/").pop();
-  const user = localStorage.getItem("user");
+  const user = sessionStorage.getItem("user"); // đổi localStorage -> sessionStorage
 
   if (!user && !openPages.includes(current)) {
     // Nếu chưa login mà vào trang khác → bắt login

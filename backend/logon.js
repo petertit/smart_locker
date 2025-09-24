@@ -23,7 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await res.json();
       if (res.ok) {
         alert("✅ Đăng nhập thành công!");
-        localStorage.setItem("user", JSON.stringify(data.user));
+        sessionStorage.setItem("user", JSON.stringify(data.user));
+
         window.location.href = "index.html"; // quay về trang chính
       } else {
         alert("❌ Lỗi: " + data.error);
