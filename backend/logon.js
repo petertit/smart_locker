@@ -1,11 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const form = document.querySelector("form");
+  // Nếu đã đăng nhập rồi thì chuyển luôn về index
+  const existingUser = localStorage.getItem("user");
+  if (existingUser) {
+    window.location.href = "index.html";
+    return;
+  }
 
+  const form = document.getElementById("loginForm");
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const email = document.querySelector('input[name="email"]').value;
-    const password = document.querySelector('input[name="password"]').value;
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
 
     try {
       const res = await fetch("https://smart-locker-kgnx.onrender.com/login", {
@@ -17,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await res.json();
       if (res.ok) {
         alert("✅ Đăng nhập thành công!");
-        localStorage.setItem("user", JSON.stringify(data.user)); // lưu user
+        localStorage.setItem("user", JSON.stringify(data.user));
         window.location.href = "index.html"; // quay về trang chính
       } else {
         alert("❌ Lỗi: " + data.error);
