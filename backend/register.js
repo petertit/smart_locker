@@ -1,3 +1,5 @@
+// register.js
+
 document
   .getElementById("registerForm")
   .addEventListener("submit", async function (e) {
@@ -15,7 +17,7 @@ document
 
     try {
       const res = await fetch(
-        "https://smart-locker-kgnx.onrender.com/register",
+        "https://smart-locker-backend.onrender.com/register",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -26,7 +28,7 @@ document
       const data = await res.json();
       if (res.ok) {
         alert("✅ Register successful! Please log in.");
-        window.location.href = "logon.html";
+        window.location.href = "logon.html"; // chuyển sang trang login
       } else {
         alert("❌ " + data.error);
       }
@@ -35,7 +37,7 @@ document
     }
   });
 
-// Giữ hiệu ứng ban đầu cho input
+// Hiệu ứng input giữ nguyên
 document.querySelectorAll(".input").forEach((inputEl) => {
   inputEl.addEventListener("focus", () => {
     inputEl.parentNode.classList.add("active");
