@@ -1,3 +1,3 @@
-MONGO_URI=mongodb+srv://titahihi299:%40Titahihi299@titahihi299.ubprr3p.mongodb.net/smart_box?retryWrites=true&w=majority&appName=titahihi299
+MONGO_URI=mongodb+srv://titahihi299:@Titahihi299@titahihi299.ubprr3p.mongodb.net/smart_box?retryWrites=true&w=majority&appName=titahihi299
 
 PORT=4000
