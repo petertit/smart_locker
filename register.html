@@ -83,19 +83,65 @@
             />
           </div>
 
-          <div class="captcha">
-            <input type="checkbox" id="captcha" name="captcha" required />
-            <label for="captcha">I'm not a robot</label>
-          </div>
+          <!-- ... phía trên giữ nguyên ... -->
 
-          <button type="submit" class="btn">SAVE</button>
-          <p class="login-hint">
-            If you already have an account, please click
-            <a href="logon.html">log on</a>
-          </p>
-        </form>
+<!-- Phần form (chỉ đưa đoạn form thôi, thay thế vào file gốc) -->
+<form id="registerForm">
+  <div class="form-row">
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" required />
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required />
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" name="phone" required />
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required />
+    </div>
+  </div>
+
+  <div class="form-group full">
+    <label for="hint">Hint Password</label>
+    <input
+      type="text"
+      id="hint"
+      name="hint"
+      placeholder="Write your password hint.."
+    />
+  </div>
+
+  <!-- ====== CAPTCHA THẬT ====== -->
+  <div class="captcha-real">
+    <div class="captcha-row">
+      <canvas id="captchaCanvas" width="200" height="70" aria-label="captcha image"></canvas>
+      <div class="captcha-controls">
+        <button type="button" id="refreshCaptcha" class="btn small">↻</button>
+        <button type="button" id="audioCaptcha" class="btn small">🔊</button>
       </div>
     </div>
+    <label for="captchaInput" class="captcha-label">Enter the code above</label>
+    <input type="text" id="captchaInput" name="captchaInput" placeholder="Enter captcha" required />
+  </div>
+
+  <button type="submit" class="btn">SAVE</button>
+  <p class="login-hint">
+    If you already have an account, please click <a href="logon.html">log on</a>
+  </p>
+</form>
+
+<!-- ... phía dưới giữ nguyên ... -->
+
 
     <script src="./backend/register.js"></script>
   </body>
