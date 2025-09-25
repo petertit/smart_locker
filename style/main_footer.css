@@ -72,3 +72,21 @@
   text-align: center;
   opacity: 0.8;
 }
+/* Giữ nguyên body padding */
+html,
+body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-content {
+  flex: 1; /* đẩy footer xuống cuối */
+}
+
+.footer {
+  background: #0063ff;
+  color: white;
+  padding: 40px 60px;
+  margin-top: auto; /* đảm bảo footer dính đáy */
+}
