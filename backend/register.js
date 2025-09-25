@@ -1,13 +1,15 @@
 // register.js
 
+// register.js
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector("form");
+  if (!form) return;
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const name = document.querySelector('input[name="name"]').value;
-    const email = document.querySelector('input[name="email"]').value;
+    const name = document.querySelector('input[name="name"]').value.trim();
+    const email = document.querySelector('input[name="email"]').value.trim();
     const password = document.querySelector('input[name="password"]').value;
 
     try {
@@ -23,9 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await res.json();
       if (res.ok) {
         alert("✅ Đăng ký thành công!");
-        window.location.href = "logon.html"; // chuyển sang login
+        window.location.href = "logon.html"; // chuyển sang login
       } else {
-        alert("❌ Lỗi: " + data.error);
+        alert("❌ " + (data.error || "Register failed"));
       }
     } catch (err) {
       alert("❌ Fetch error: " + err.message);

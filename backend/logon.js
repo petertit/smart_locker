@@ -1,15 +1,16 @@
+// logon.js
 document.addEventListener("DOMContentLoaded", () => {
-  // Nếu đã đăng nhập rồi thì chuyển luôn về index
-  const existingUser = localStorage.getItem("user");
-  if (existingUser) {
+  // Nếu đã login (sessionStorage), chuyển về index luôn
+  if (sessionStorage.getItem("user")) {
     window.location.href = "index.html";
     return;
   }
 
   const form = document.getElementById("loginForm");
+  if (!form) return;
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
 
@@ -21,13 +22,14 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       const data = await res.json();
-      if (res.ok) {
-        alert("✅ Đăng nhập thành công!");
-        sessionStorage.setItem("user", JSON.stringify(data.user));
 
-        window.location.href = "index.html"; // quay về trang chính
+      if (res.ok) {
+        // Lưu user vào sessionStorage (session sẽ mất khi đóng tab)
+        sessionStorage.setItem("user", JSON.stringify(data.user));
+        // chuyển về index
+        window.location.href = "index.html";
       } else {
-        alert("❌ Lỗi: " + data.error);
+        alert("❌ " + (data.error || "Login failed"));
       }
     } catch (err) {
       alert("❌ Fetch error: " + err.message);
