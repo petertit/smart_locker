@@ -10,21 +10,19 @@
       href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rubik+Mono+One&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
       rel="stylesheet"
     />
+    <title>Scan - Start Your Journey</title>
     <!-- css -->
-    <title>Sign up - F-LOCK</title>
-    <link rel="stylesheet" href="style/main_header.css" />
-    <link rel="stylesheet" href="style/main_footer.css" />
-    <link rel="stylesheet" href="style/logon.css" />
+    <link rel="stylesheet" href="../style/main_header.css" />
+    <link rel="stylesheet" href="../style/main_footer.css" />
+    <link rel="stylesheet" href="../style/scan.css" />
     <!-- <link rel="stylesheet" href="./style/responsive.css" /> -->
-  </head>
-  <body>
     <!-- menu -->
     <section class="o">
       <div class="menu">
         <h2>F-LOCK</h2>
         <a href="./menu.html">
           <img
-            src="./design/SOURCE_IMAGE/Menu.png"
+            src="../design/SOURCE_IMAGE/Menu.png"
             alt="menu"
             class="icon_menu"
           />
@@ -34,34 +32,32 @@
     </section>
     <!-- header -->
     <div class="header">
-      <p id="row1">SIGN IN</p>
-      <h1>Ready to take the next step?</h1>
-      <p id="row3">Fill out the form to start your journey with us</p>
+      <p id="row1">Our people</p>
+      <h1>We are the better together</h1>
+
+      <p id="row3">
+        Together, we create a positive impact. Meet the Dapixel team and see how
+        we turn great ideas into results
+      </p>
+    </div>
+  </head>
+  <!-- content -->
+  <body>
+    <div class="face-scan-wrapper">
+      <img
+        src="../design/SOURCE_IMAGE/scan.jpg"
+        alt="face scan"
+        class="face_scan"
+      />
+    </div>
+    <div class="more-info">
+      <h1>We are the better together</h1>
     </div>
 
-    <!-- Form đăng nhập -->
-    <div class="register-container login-container">
-      <div class="right-side">
-        <form id="loginForm">
-          <div class="form-group full">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required />
-          </div>
-
-          <div class="form-group full">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required />
-          </div>
-
-          <button type="submit" class="btn">LOG ON</button>
-          <div class="register-link">
-            If you don’t have an account, please
-            <a href="register.html">Register</a>
-          </div>
-        </form>
-      </div>
-    </div>
-    <script src="./backend/logon.js"></script>
+    <!-- script -->
+    <script src="../backend/camera_client.js"></script>
+    <script src="../backend/camera_loader.js"></script>
+    <script src="../backend/camera_pi.js"></script>
   </body>
 
   <!-- footer -->
@@ -74,13 +70,12 @@
           biến việc lưu trữ hằng ngày thành một trải nghiệm thông minh và bảo
           mật hơn!
         </p>
-
         <nav class="footer-nav">
-          <a href="index.html">Home</a>
-          <a href="guild.html">User Guide</a>
-          <a href="open.html">Open Locker</a>
-          <a href="about_us.html">About</a>
-          <a href="face_res.html">ID</a>
+          <a href="./index.html">Home</a>
+          <a href="./guild.html">User Guide</a>
+          <a href="./open.html">Open Locker</a>
+          <a href="./about_us.html">About</a>
+          <a href="./face_res.html">ID</a>
         </nav>
       </div>
 
