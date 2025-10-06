@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <!-- font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -10,12 +11,12 @@
       href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rubik+Mono+One&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
       rel="stylesheet"
     />
-    <title>Scan - Start Your Journey</title>
+    <title>About us</title>
     <!-- css -->
     <link rel="stylesheet" href="style/main_header.css" />
     <link rel="stylesheet" href="./style/main_footer.css" />
-    <link rel="stylesheet" href="./style/scan.css" />
-    <!-- <link rel="stylesheet" href="./style/responsive.css" /> -->
+    <link rel="stylesheet" href="./style/face_res.css" />
+    <link rel="stylesheet" href="./style/responsive.css" />
     <!-- menu -->
     <section class="o">
       <div class="menu">
@@ -30,33 +31,33 @@
       </div>
       <hr />
     </section>
-    <!-- header -->
-    <div class="header">
-      <p id="row1">Our people</p>
-      <h1>We are the better together</h1>
 
-      <p id="row3">
-        Together, we create a positive impact. Meet the Dapixel team and see how
-        we turn great ideas into results
-      </p>
+    <!-- header -->
+
+    <div class="header">
+      <p id="row1">wellcome</p>
+      <h1>Please select a registration method</h1>
     </div>
   </head>
-  <!-- content -->
+  <!-- body -->
   <body>
-    <div class="face-scan-wrapper">
-      <img
-        src="./design/SOURCE_IMAGE/scan.jpg"
-        alt="face scan"
-        class="face_scan"
-      />
+    <div class="team-section">
+      <div class="team-grid">
+        <div class="team-card">
+          <a href="./face_id.html"
+            ><img src="./design/SOURCE_IMAGE/faceid.png" alt="member"
+          /></a>
+          <h3>Face ID</h3>
+        </div>
+        <div class="team-card">
+          <a href="./pass_lock.html">
+            <img src="./design/SOURCE_IMAGE/smartkey.png" alt="member"
+          /></a>
+          <h3>Password</h3>
+        </div>
+      </div>
     </div>
-    <div class="more-info">
-      <h1>We are the better together</h1>
-    </div>
-    <!-- script -->
-    <script src="./backend/camera_client.js"></script>
-    <script src="./backend/camera_loader.js"></script>
-    <script src="./backend/camera_pi.js"></script>
+    <!-- <script src="./backend/auth_protect.js"></script> -->
   </body>
 
   <!-- footer -->
@@ -74,7 +75,7 @@
           <a href="guild.html">User Guide</a>
           <a href="open.html">Open Locker</a>
           <a href="about_us.html">About</a>
-          <a href="./face_res.html">ID</a>
+          <a href="#">ID</a>
         </nav>
       </div>
 
