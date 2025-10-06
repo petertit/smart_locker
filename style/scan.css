@@ -40,8 +40,8 @@ body {
 }
 
 .face_scan {
-  width: 1007.25px;
-  height: 1007.25px;
+  width: 800px;
+  height: 800px;
   border-radius: 15px;
   display: block;
   border: 1px solid #1a2be8;
