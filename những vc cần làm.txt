@@ -1,0 +1,8 @@
+những vc cần làm :
+1. một trang đăng ký mật khẩu mở tủ và đăng ký khuôn mặt, trang đăng ký gồm : 2 hình (1 face và 1 password) 
++ trang face có nút để chụp ảnh
++ trang pass có chức năng để người dùng đăng ký pass
+2. lưu trên server: 
++ 1 tài khoản 1 khuôn mặt
++ 1 tài khoản 1 mã tủ
+3. nhận diện khuôn măt thành công trên web
