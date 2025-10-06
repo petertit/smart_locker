@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <!-- font -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -11,11 +10,11 @@
       href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rubik+Mono+One&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
       rel="stylesheet"
     />
-    <title>About us</title>
+    <title>Scan - Start Your Journey</title>
     <!-- css -->
-    <link rel="stylesheet" href="../style/main_header.css" />
-    <link rel="stylesheet" href="../style/main_footer.css" />
-    <link rel="stylesheet" href="../style/about_us.css" />
+    <link rel="stylesheet" href="./style/main_header.css" />
+    <link rel="stylesheet" href="./style/main_footer.css" />
+    <link rel="stylesheet" href="./style/scan.css" />
     <!-- <link rel="stylesheet" href="./style/responsive.css" /> -->
     <!-- menu -->
     <section class="o">
@@ -23,7 +22,7 @@
         <h2>F-LOCK</h2>
         <a href="./menu.html">
           <img
-            src="../design/SOURCE_IMAGE/Menu.png"
+            src="./design/SOURCE_IMAGE/Menu.png"
             alt="menu"
             class="icon_menu"
           />
@@ -31,9 +30,7 @@
       </div>
       <hr />
     </section>
-
     <!-- header -->
-
     <div class="header">
       <p id="row1">Our people</p>
       <h1>We are the better together</h1>
@@ -44,59 +41,23 @@
       </p>
     </div>
   </head>
+  <!-- content -->
   <body>
-    <div class="team-section">
-      <div class="team-grid">
-        <div class="team-card">
-          <img src="../design/SOURCE_IMAGE/human.jpg" alt="member" />
-          <h3>QUÝ MC</h3>
-          <p class="role">Product Designer</p>
-        </div>
-
-        <div class="team-card">
-          <img src="../design/SOURCE_IMAGE/human.jpg" alt="member" />
-          <h3>QUỐC CƯỜNG</h3>
-          <p class="role">Product Designer</p>
-        </div>
-
-        <div class="team-card">
-          <img src="../design/SOURCE_IMAGE/human.jpg" alt="member" />
-          <h3>THẦY TRÍ</h3>
-          <p class="role">Assistant</p>
-        </div>
-
-        <div class="team-card">
-          <img src="../design/SOURCE_IMAGE/human.jpg" alt="member" />
-          <h3>THẦY TUẤN ANH</h3>
-          <p class="role">Assistant</p>
-        </div>
-
-        <div class="team-card">
-          <img src="../design/SOURCE_IMAGE/human.jpg" alt="member" />
-          <h3>CLIENT</h3>
-          <p class="role">Member</p>
-        </div>
-
-        <div class="team-card">
-          <img src="../design/SOURCE_IMAGE/human.jpg" alt="member" />
-          <h3>CLIENT</h3>
-          <p class="role">Member</p>
-        </div>
-
-        <div class="team-card">
-          <img src="../design/SOURCE_IMAGE/human.jpg" alt="member" />
-          <h3>CLIENT</h3>
-          <p class="role">Member</p>
-        </div>
-
-        <div class="team-card">
-          <img src="../design/SOURCE_IMAGE/human.jpg" alt="member" />
-          <h3>CLIENT</h3>
-          <p class="role">Member</p>
-        </div>
-      </div>
+    <div class="face-scan-wrapper">
+      <img
+        src="./design/SOURCE_IMAGE/scan.jpg"
+        alt="face scan"
+        class="face_scan"
+      />
     </div>
-    <script src="../backend/auth_protect.js"></script>
+    <div class="more-info">
+      <h1>We are the better together</h1>
+    </div>
+
+    <!-- script -->
+    <script src="./backend/camera_client.js"></script>
+    <script src="./backend/camera_loader.js"></script>
+    <script src="./backend/camera_pi.js"></script>
   </body>
 
   <!-- footer -->
@@ -109,12 +70,11 @@
           biến việc lưu trữ hằng ngày thành một trải nghiệm thông minh và bảo
           mật hơn!
         </p>
-
         <nav class="footer-nav">
           <a href="./index.html">Home</a>
           <a href="./guild.html">User Guide</a>
           <a href="./open.html">Open Locker</a>
-          <a href="#">About</a>
+          <a href="./about_us.html">About</a>
           <a href="./face_res.html">ID</a>
         </nav>
       </div>

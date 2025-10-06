@@ -10,19 +10,21 @@
       href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rubik+Mono+One&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
       rel="stylesheet"
     />
-    <title>Scan - Start Your Journey</title>
     <!-- css -->
-    <link rel="stylesheet" href="../style/main_header.css" />
-    <link rel="stylesheet" href="../style/main_footer.css" />
-    <link rel="stylesheet" href="../style/scan.css" />
+    <title>Sign up - F-LOCK</title>
+    <link rel="stylesheet" href="./style/main_header.css" />
+    <link rel="stylesheet" href="./style/main_footer.css" />
+    <link rel="stylesheet" href="./style/pass_lock.css" />
     <!-- <link rel="stylesheet" href="./style/responsive.css" /> -->
+  </head>
+  <body>
     <!-- menu -->
     <section class="o">
       <div class="menu">
         <h2>F-LOCK</h2>
         <a href="./menu.html">
           <img
-            src="../design/SOURCE_IMAGE/Menu.png"
+            src="./design/SOURCE_IMAGE/Menu.png"
             alt="menu"
             class="icon_menu"
           />
@@ -32,32 +34,30 @@
     </section>
     <!-- header -->
     <div class="header">
-      <p id="row1">Our people</p>
-      <h1>We are the better together</h1>
-
-      <p id="row3">
-        Together, we create a positive impact. Meet the Dapixel team and see how
-        we turn great ideas into results
-      </p>
-    </div>
-  </head>
-  <!-- content -->
-  <body>
-    <div class="face-scan-wrapper">
-      <img
-        src="../design/SOURCE_IMAGE/scan.jpg"
-        alt="face scan"
-        class="face_scan"
-      />
-    </div>
-    <div class="more-info">
-      <h1>We are the better together</h1>
+      <p id="row1">SIGN UP</p>
+      <h1>Please enter the password</h1>
+      <p id="row3"></p>
     </div>
 
+    <!-- Form đăng nhập -->
+    <div class="register-container login-container">
+      <div class="right-side">
+        <form id="loginForm">
+          <div class="form-group full">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required />
+          </div>
+
+          <button type="submit" class="btn">Register</button>
+          <div class="register-link">
+            If you want register face id, please click
+            <a href="./face_id.html">Face id</a>
+          </div>
+        </form>
+      </div>
+    </div>
     <!-- script -->
-    <script src="../backend/camera_client.js"></script>
-    <script src="../backend/camera_loader.js"></script>
-    <script src="../backend/camera_pi.js"></script>
+    <script src="./backend/logon.js"></script>
   </body>
 
   <!-- footer -->
