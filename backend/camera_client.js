@@ -12,7 +12,7 @@
     v.id = VIDEO_ID;
     v.autoplay = true;
     v.playsInline = true;
-    v.style.maxWidth = "500px";
+    v.style.maxWidth = "800px";
     v.style.borderRadius = "12px";
     return v;
   }
@@ -67,7 +67,7 @@
     img.className = "face_scan";
     img.src = dataUrl;
     img.alt = "Captured Image";
-    img.style.width = "500px";
+    img.style.width = "800px";
     img.style.height = "auto";
     wrapper.replaceChild(img, vidEl);
 
