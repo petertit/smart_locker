@@ -19,9 +19,11 @@ mongoose
 // ===== Schema & Model =====
 const accountSchema = new mongoose.Schema(
   {
-    username: { type: String, required: true },
+    name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    phone: { type: String, required: true },
     password: { type: String, required: true },
+    hint: { type: String },
   },
   { collection: "account" }
 );
@@ -65,3 +67,18 @@ app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
 // --- IGNORE ---
+// --- Update user info ---
+app.post("/update", async (req, res) => {
+  try {
+    const { id, name, email, phone, password, hint } = req.body;
+    const updated = await Account.findByIdAndUpdate(
+      id,
+      { name, email, phone, password, hint },
+      { new: true }
+    );
+    if (!updated) return res.status(404).json({ error: "User not found" });
+    res.json({ message: "Updated", user: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});

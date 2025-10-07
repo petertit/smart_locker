@@ -6,21 +6,27 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  const usernameEl = document.getElementById("username");
+  // Gán phần tử
+  const nameEl = document.getElementById("name");
   const emailEl = document.getElementById("email");
+  const phoneEl = document.getElementById("phone");
   const passwordEl = document.getElementById("password");
+  const hintEl = document.getElementById("hint");
   const changeBtn = document.getElementById("change-btn");
   const saveBtn = document.getElementById("save-btn");
   const logoutBtn = document.getElementById("logout-btn");
   const backBtn = document.getElementById("back-btn");
 
-  usernameEl.textContent = user.username || "";
+  // Hiển thị dữ liệu
+  nameEl.textContent = user.name || "";
   emailEl.textContent = user.email || "";
+  phoneEl.textContent = user.phone || "";
   passwordEl.textContent = user.password || "";
+  hintEl.textContent = user.hint || "";
 
   // Nút Change -> Cho phép chỉnh sửa
   changeBtn.addEventListener("click", () => {
-    [usernameEl, emailEl, passwordEl].forEach((el) => {
+    [nameEl, emailEl, phoneEl, passwordEl, hintEl].forEach((el) => {
       el.contentEditable = true;
       el.style.borderBottom = "2px solid #0063ff";
     });
@@ -30,9 +36,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Nút Save -> Gửi update về server
   saveBtn.addEventListener("click", async () => {
     const newData = {
-      username: usernameEl.textContent.trim(),
+      name: nameEl.textContent.trim(),
       email: emailEl.textContent.trim(),
+      phone: phoneEl.textContent.trim(),
       password: passwordEl.textContent.trim(),
+      hint: hintEl.textContent.trim(),
     };
 
     try {
@@ -47,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("✅ Updated successfully!");
         sessionStorage.setItem("user", JSON.stringify({ ...user, ...newData }));
         saveBtn.style.display = "none";
-        [usernameEl, emailEl, passwordEl].forEach((el) => {
+        [nameEl, emailEl, phoneEl, passwordEl, hintEl].forEach((el) => {
           el.contentEditable = false;
           el.style.borderBottom = "none";
         });
