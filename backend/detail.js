@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Gán phần tử
   const nameEl = document.getElementById("name");
   const emailEl = document.getElementById("email");
   const phoneEl = document.getElementById("phone");
@@ -17,14 +16,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const logoutBtn = document.getElementById("logout-btn");
   const backBtn = document.getElementById("back-btn");
 
-  // Hiển thị dữ liệu
+  // Hiển thị thông tin
   nameEl.textContent = user.name || "";
   emailEl.textContent = user.email || "";
   phoneEl.textContent = user.phone || "";
   passwordEl.textContent = user.password || "";
   hintEl.textContent = user.hint || "";
 
-  // Nút Change -> Cho phép chỉnh sửa
+  // Nút Change
   changeBtn.addEventListener("click", () => {
     [nameEl, emailEl, phoneEl, passwordEl, hintEl].forEach((el) => {
       el.contentEditable = true;
@@ -33,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     saveBtn.style.display = "inline-block";
   });
 
-  // Nút Save -> Gửi update về server
+  // Nút Save
   saveBtn.addEventListener("click", async () => {
     const newData = {
       name: nameEl.textContent.trim(),
@@ -67,19 +66,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Nút Back -> về Menu
+  // Nút Back
   backBtn.addEventListener("click", () => {
     window.location.href = "menu.html";
   });
 
-  // Nút Logout
+  // Logout
   logoutBtn.addEventListener("click", () => {
     sessionStorage.removeItem("user");
     alert("You have been logged out.");
     window.location.href = "logon.html";
   });
 
-  // Tự động đăng xuất khi tắt tab
+  // Auto logout on tab close
   window.addEventListener("beforeunload", () => {
     sessionStorage.removeItem("user");
   });
