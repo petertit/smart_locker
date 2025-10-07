@@ -97,7 +97,14 @@ body {
   color: #aaa;
   margin-bottom: 10px;
 }
-
+.account-info {
+  margin-top: auto;
+  text-align: left;
+  font-family: "Epilogue", sans-serif;
+  font-size: 55px;
+  font-weight: 400;
+  color: #0063ff;
+}
 .subheadline {
   font-family: "Epilogue", sans-serif;
   font-size: 55px;
@@ -161,6 +168,20 @@ body {
     justify-content: center;
     margin-top: 40px;
   }
+}
+.menu-btn {
+  background: #5319b0;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 9px 25px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.menu-btn:hover {
+  background: #c80633;
 }
 .logout-btn {
   background: #5319b0;
