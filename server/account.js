@@ -191,3 +191,39 @@ app.listen(PORT, () =>
   console.log(`🚀 Server running on http://localhost:${PORT}`)
 );
 // --- IGNORE ---
+
+// -- training data --
+
+app.post("/api/upload-train", async (req, res) => {
+  try {
+    const { timestamp, model } = req.body;
+    const TrainModel = mongoose.model(
+      "TrainModel",
+      new mongoose.Schema({
+        timestamp: String,
+        model: String,
+      }),
+      "train_models"
+    );
+
+    const saved = await new TrainModel({ timestamp, model }).save();
+    res.json({ message: "Train model saved", id: saved._id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/latest-train", async (req, res) => {
+  const TrainModel = mongoose.model(
+    "TrainModel",
+    new mongoose.Schema({
+      timestamp: String,
+      model: String,
+    }),
+    "train_models"
+  );
+
+  const latest = await TrainModel.findOne().sort({ timestamp: -1 });
+  if (!latest) return res.status(404).json({ error: "No model found" });
+  res.json(latest);
+});
