@@ -103,7 +103,18 @@ body {
   font-family: "Epilogue", sans-serif;
   font-size: 32px;
   font-weight: 400;
-  color: #ffffff;
+  color: #0063ff;
+}
+#email,
+#name,
+#phone,
+#password,
+#hint {
+  font-family: "Epilogue", sans-serif;
+  font-size: 30px;
+  font-weight: 400;
+  color: #fff;
+  margin-bottom: 40px;
 }
 .subheadline {
   font-family: "Epilogue", sans-serif;
