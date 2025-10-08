@@ -7,15 +7,18 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rubik+Mono+One&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Epilogue:wght@400;600&family=Rubik:wght@400;600&display=swap"
       rel="stylesheet"
     />
-    <title>Scan - Start Your Journey</title>
-    <!-- css -->
+    <title>Face Recognition - F-LOCK</title>
+
+    <!-- CSS -->
     <link rel="stylesheet" href="./style/main_header.css" />
     <link rel="stylesheet" href="./style/main_footer.css" />
     <link rel="stylesheet" href="./style/scan.css" />
-    <!-- <link rel="stylesheet" href="./style/responsive.css" /> -->
+  </head>
+
+  <body>
     <!-- menu -->
     <section class="o">
       <div class="menu">
@@ -30,71 +33,65 @@
       </div>
       <hr />
     </section>
+
     <!-- header -->
     <div class="header">
-      <p id="row1">Our people</p>
-      <h1>We are the better together</h1>
-
+      <p id="row1">Face Recognition</p>
+      <h1>Identify and Unlock</h1>
       <p id="row3">
-        Together, we create a positive impact. Meet the Dapixel team and see how
-        we turn great ideas into results
+        Align your face with the camera for secure verification with F-LOCK.
       </p>
     </div>
-  </head>
-  <!-- content -->
-  <body>
+
+    <!-- content -->
     <div class="face-scan-wrapper">
-      <img
-        src="./design/SOURCE_IMAGE/scan.jpg"
-        alt="face scan"
-        class="face_scan"
-      />
-    </div>
-    <div class="more-info">
-      <h1>We are the better together</h1>
+      <video id="cameraPreview" autoplay playsinline></video>
+      <div class="recognition-status">
+        <h2 id="status">🕐 Waiting for recognition...</h2>
+      </div>
     </div>
 
-    <!-- script -->
+    <!-- scripts -->
     <script src="./backend/camera_client.js"></script>
     <script src="./backend/camera_loader.js"></script>
     <script src="./backend/camera_pi.js"></script>
     <script src="./backend/scan.js"></script>
+
+    <!-- footer -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-left">
+          <h2 id="end_F">F-LOCK</h2>
+          <p>
+            Tủ khóa thông minh của chúng tôi mang đến sự an toàn và tiện lợi.
+            Hãy biến việc lưu trữ hằng ngày thành một trải nghiệm thông minh và
+            bảo mật hơn!
+          </p>
+          <nav class="footer-nav">
+            <a href="./index.html">Home</a>
+            <a href="./guild.html">User Guide</a>
+            <a href="./open.html">Open Locker</a>
+            <a href="./about_us.html">About</a>
+            <a href="./face_res.html">ID</a>
+          </nav>
+        </div>
+
+        <div class="footer-right">
+          <p>
+            Are you ready to unlock a smarter and more secure experience with
+            our device?
+          </p>
+          <p>
+            Drop us a line at <br />
+            <a href="mailto:aicungvay321@gmail.com" class="email-link">
+              aicungvay321@gmail.com
+            </a>
+          </p>
+        </div>
+      </div>
+
+      <hr class="footer-line" />
+      <p class="copyright">© 2025 F-LOCK. All rights reserved.</p>
+    </footer>
   </body>
-
-  <!-- footer -->
-  <footer class="footer">
-    <div class="footer-content">
-      <div class="footer-left">
-        <h2 id="end_F">F-LOCK</h2>
-        <p>
-          Tủ khóa thông minh của chúng tôi mang đến sự an toàn và tiện lợi. Hãy
-          biến việc lưu trữ hằng ngày thành một trải nghiệm thông minh và bảo
-          mật hơn!
-        </p>
-        <nav class="footer-nav">
-          <a href="./index.html">Home</a>
-          <a href="./guild.html">User Guide</a>
-          <a href="./open.html">Open Locker</a>
-          <a href="./about_us.html">About</a>
-          <a href="./face_res.html">ID</a>
-        </nav>
-      </div>
-
-      <div class="footer-right">
-        <p>
-          Are you ready to unlock a smarter and more secure experience with our
-          device?
-        </p>
-        <p>
-          Drop us a line at <br />
-          <a href="mailto:aicungvay321@gmail.com" class="email-link">
-            aicungvay321@gmail.com
-          </a>
-        </p>
-      </div>
-    </div>
-
-    <hr class="footer-line" />
-    <p class="copyright">© 2025 F-LOCK. All rights reserved.</p>
-  </footer>
 </html>

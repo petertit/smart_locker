@@ -1,34 +1,56 @@
-// js/scan.js
+// backend/scan.js
+
+// backend/scan.js
 document.addEventListener("DOMContentLoaded", () => {
   const videoEl = document.querySelector("#cameraPreview");
-  const detectBtn = document.querySelector(".detect-btn");
-  const resultEl = document.querySelector("#result");
+  const statusEl = document.querySelector("#status");
 
-  const RASPI_SERVER = "http://raspi.local:5000"; // hoặc IP thật của RasPi
+  // Thay IP này bằng IP thật của Raspberry Pi
+  const RASPI_SERVER = "http://192.168.1.120:5000"; // đổi IP thật
 
-  async function startPreview() {
+  // 🟢 Kiểm tra kết nối RasPi
+  async function checkConnection() {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      videoEl.srcObject = stream;
+      const res = await fetch(`${RASPI_SERVER}/status`);
+      if (res.ok) {
+        statusEl.textContent = "✅ Raspberry Pi Connected";
+        statusEl.style.color = "#00ff66";
+      } else {
+        throw new Error("Not OK");
+      }
     } catch (err) {
-      console.error("Cannot access local camera:", err);
+      statusEl.textContent = "❌ Cannot connect to Raspberry Pi";
+      statusEl.style.color = "#ff3333";
     }
   }
 
-  detectBtn.addEventListener("click", async () => {
-    resultEl.textContent = "🔍 Recognizing...";
+  // 🎥 Mở stream video từ RasPi
+  function startVideoStream() {
+    videoEl.src = `${RASPI_SERVER}/video_feed`;
+  }
+
+  // 🔄 Nhận dữ liệu nhận diện khuôn mặt liên tục
+  async function pollRecognition() {
     try {
-      const res = await fetch(`${RASPI_SERVER}/recognize`);
-      const data = await res.json();
-      if (data.success) {
-        resultEl.textContent = `✅ Recognized: ${data.name}`;
-      } else {
-        resultEl.textContent = "⚠️ No face recognized.";
+      const res = await fetch(`${RASPI_SERVER}/recognize_stream`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.name && data.name !== "Unknown") {
+          statusEl.textContent = `🔓 Welcome, ${data.name}!`;
+          statusEl.style.color = "#00ff66";
+        } else {
+          statusEl.textContent = "🔒 Face not recognized";
+          statusEl.style.color = "#ff3333";
+        }
       }
     } catch (err) {
-      resultEl.textContent = "❌ Connection to Raspberry Pi failed.";
+      console.error("Recognition polling error:", err);
     }
-  });
+    setTimeout(pollRecognition, 2000); // lặp lại mỗi 2 giây
+  }
 
-  startPreview();
+  // 🚀 Khởi động
+  checkConnection();
+  startVideoStream();
+  pollRecognition();
 });

@@ -1,54 +1,66 @@
-// js/face_id.js
+// backend/face_id.js
 document.addEventListener("DOMContentLoaded", () => {
   const takeBtn = document.querySelector(".take-btn");
   const videoEl = document.querySelector("#cameraPreview");
   const statusEl = document.querySelector("#status");
 
-  const RASPI_SERVER = "http://raspi.local:5000"; // hoặc IP thật của RasPi
+  // 🔧 IP của Raspberry Pi server
+  const RASPI_SERVER = "http://192.168.1.120:5000"; // đổi IP thật
 
-  // Kiểm tra kết nối đến Raspberry
   async function checkConnection() {
     try {
       const res = await fetch(`${RASPI_SERVER}/status`);
-      if (res.ok) {
+      const data = await res.json();
+      if (res.ok && data.status) {
         statusEl.textContent = "✅ Raspberry Pi Connected";
         statusEl.style.color = "#00ff66";
-      } else {
-        throw new Error("Not OK");
-      }
-    } catch (err) {
+      } else throw new Error();
+    } catch {
       statusEl.textContent = "❌ Cannot connect to Raspberry Pi";
       statusEl.style.color = "#ff3333";
     }
   }
 
-  // Yêu cầu RasPi bật camera preview
+  // Hiển thị camera (client-side preview)
   async function startPreview() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       videoEl.srcObject = stream;
     } catch (err) {
-      console.error("Cannot access local camera:", err);
+      console.warn("⚠️ Preview error:", err);
+      statusEl.textContent = "⚠️ Local preview not available.";
     }
   }
 
-  // Khi bấm nút Take → RasPi chụp ảnh và train
+  // Khi bấm TAKE → gửi yêu cầu RasPi chụp và train
   takeBtn.addEventListener("click", async () => {
-    statusEl.textContent = "📸 Capturing...";
+    const user = JSON.parse(sessionStorage.getItem("user"));
+    const username = user?.name || user?.username || "unknown";
+
+    statusEl.textContent = "📸 Capturing and training on Raspberry Pi...";
+    statusEl.style.color = "#ffaa00";
+
     try {
-      const res = await fetch(`${RASPI_SERVER}/capture`, { method: "POST" });
+      const res = await fetch(`${RASPI_SERVER}/capture`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: username }),
+      });
       const data = await res.json();
+
       if (data.success) {
-        statusEl.textContent = "✅ Image captured & training started!";
+        statusEl.textContent = `✅ Image saved & training complete! (${data.saved_file})`;
+        statusEl.style.color = "#00ff66";
       } else {
-        statusEl.textContent = "⚠️ Failed: " + (data.error || "Unknown error");
+        statusEl.textContent = "❌ " + (data.error || "Failed to capture");
+        statusEl.style.color = "#ff3333";
       }
     } catch (err) {
       statusEl.textContent = "❌ Cannot contact Raspberry Pi!";
+      statusEl.style.color = "#ff3333";
     }
   });
 
-  // Khi mở trang
   checkConnection();
   startPreview();
 });
