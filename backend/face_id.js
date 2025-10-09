@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const statusEl = document.querySelector("#status");
 
   // 🔧 IP của Raspberry Pi server
-  const RASPI_SERVER = "http://192.168.1.6:5000"; // đổi IP thật
+  const RASPI_SERVER = "https://192.168.1.6:5000"; // đổi IP thật
 
   async function checkConnection() {
     try {
