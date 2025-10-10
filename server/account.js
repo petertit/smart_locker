@@ -1,16 +1,17 @@
+// account.js — ESM version (for Render)
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
 
-dotenv.config(); // Lấy biến môi trường từ Render (Environment Variables)
+dotenv.config(); // Load .env (Render Variables)
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ===== Kết nối MongoDB Atlas =====
+// ===== MongoDB Atlas Connection =====
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -19,7 +20,7 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB Atlas"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// ===== Schema người dùng =====
+// ===== User Schema =====
 const accountSchema = new mongoose.Schema(
   {
     name: String,
@@ -33,7 +34,7 @@ const accountSchema = new mongoose.Schema(
 
 const Account = mongoose.model("Account", accountSchema);
 
-// ========== AUTH ==========
+// ===== Register =====
 app.post("/register", async (req, res) => {
   try {
     const { name, email, phone, password, hint } = req.body;
@@ -51,6 +52,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
+// ===== Login =====
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -62,7 +64,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// ===== Cập nhật thông tin người dùng =====
+// ===== Update User =====
 app.post("/update", async (req, res) => {
   try {
     const { id, name, email, phone, password, hint } = req.body;
@@ -78,7 +80,7 @@ app.post("/update", async (req, res) => {
   }
 });
 
-// ===== Bridge tới Raspberry Pi (qua ngrok) =====
+// ===== Bridge tới Raspberry Pi (qua ngrok HTTPS) =====
 const RASPI_URL = process.env.RASPI_URL; // ví dụ: https://xxxx.ngrok-free.app
 
 app.get("/raspi/status", async (req, res) => {
@@ -115,6 +117,8 @@ app.get("/raspi/recognize", async (req, res) => {
   }
 });
 
-// ===== Start server =====
+// ===== Start Server =====
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`🚀 Server running on port ${PORT} (ESM mode)`)
+);
