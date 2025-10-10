@@ -5,7 +5,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const statusEl = document.querySelector("#status");
 
   // 🔧 IP của Raspberry Pi server
-  const RASPI_SERVER = "http://localhost:5000";
+  const RASPI_SERVER = "https://smart-locker-kgnx.onrender.com";
+
   // đổi IP thật
 
   async function checkConnection() {
