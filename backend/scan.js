@@ -1,54 +1,52 @@
 // backend/scan.js
-
-// backend/scan.js
 document.addEventListener("DOMContentLoaded", () => {
   const videoEl = document.querySelector("#cameraPreview");
   const statusEl = document.querySelector("#status");
 
-  // Thay IP này bằng IP thật của Raspberry Pi
-  const RASPI_SERVER = "https://smart-locker-kgnx.onrender.com/raspi";
+  // 🌐 Render server trung gian
+  const BRIDGE_SERVER = "https://smart-locker-kgnx.onrender.com/raspi";
 
-  // đổi IP thật
+  // 🌍 Ngrok RasPi — copy từ terminal ngrok của bạn!
+  const RASPI_NGROK = "https://kristen-unwarmable-jesenia.ngrok-free.dev";
 
-  // 🟢 Kiểm tra kết nối RasPi
+  // 🟢 Kiểm tra kết nối Render Bridge
   async function checkConnection() {
     try {
-      const res = await fetch(`${RASPI_SERVER}/status`);
+      const res = await fetch(`${BRIDGE_SERVER}/status`);
       if (res.ok) {
-        statusEl.textContent = "✅ Raspberry Pi Connected";
+        statusEl.textContent = "✅ Connected to Render Bridge";
         statusEl.style.color = "#00ff66";
-      } else {
-        throw new Error("Not OK");
-      }
-    } catch (err) {
-      statusEl.textContent = "❌ Cannot connect to Raspberry Pi";
+      } else throw new Error("Not OK");
+    } catch {
+      statusEl.textContent = "❌ Cannot connect to Render Bridge";
       statusEl.style.color = "#ff3333";
     }
   }
 
-  // 🎥 Mở stream video từ RasPi
+  // 🎥 Mở video stream từ RasPi qua ngrok
   function startVideoStream() {
-    videoEl.src = `${RASPI_SERVER}/video_feed`;
+    videoEl.src = `${RASPI_NGROK}/video_feed`; // trực tiếp từ RasPi
   }
 
-  // 🔄 Nhận dữ liệu nhận diện khuôn mặt liên tục
+  // 🔄 Gọi nhận diện khuôn mặt (qua Render → RasPi)
   async function pollRecognition() {
     try {
-      const res = await fetch(`${RASPI_SERVER}/recognize_stream`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.name && data.name !== "Unknown") {
-          statusEl.textContent = `🔓 Welcome, ${data.name}!`;
-          statusEl.style.color = "#00ff66";
-        } else {
-          statusEl.textContent = "🔒 Face not recognized";
-          statusEl.style.color = "#ff3333";
-        }
+      const res = await fetch(`${BRIDGE_SERVER}/recognize`);
+      const data = await res.json();
+      if (data.success && data.name && data.name !== "Unknown") {
+        statusEl.textContent = `🔓 Welcome, ${data.name}!`;
+        statusEl.style.color = "#00ff66";
+      } else {
+        statusEl.textContent = "🔒 Face not recognized";
+        statusEl.style.color = "#ff3333";
       }
     } catch (err) {
       console.error("Recognition polling error:", err);
+      statusEl.textContent = "⚠️ Recognition error";
+      statusEl.style.color = "#ffaa00";
     }
-    setTimeout(pollRecognition, 2000); // lặp lại mỗi 2 giây
+
+    setTimeout(pollRecognition, 3000);
   }
 
   // 🚀 Khởi động
