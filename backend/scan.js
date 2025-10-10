@@ -6,7 +6,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const statusEl = document.querySelector("#status");
 
   // Thay IP này bằng IP thật của Raspberry Pi
-  const RASPI_SERVER = "https://smart-locker-kgnx.onrender.com/bridge";
+  const RASPI_SERVER = "https://your-render-app.onrender.com/raspi";
+
   // đổi IP thật
 
   // 🟢 Kiểm tra kết nối RasPi
