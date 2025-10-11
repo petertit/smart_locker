@@ -1,13 +1,13 @@
 // backend/face_id.js
 document.addEventListener("DOMContentLoaded", () => {
   const takeBtn = document.querySelector(".take-btn");
-  const videoEl = document.querySelector("#cameraPreview");
+  const cameraImg = document.querySelector("#cameraPreview");
   const statusEl = document.querySelector("#status");
 
-  // 🌐 Server trung gian (Render)
+  // 🌐 Render trung gian (backend)
   const BRIDGE_SERVER = "https://smart-locker-kgnx.onrender.com/raspi";
 
-  // 🌍 Link ngrok RasPi của bạn (lấy từ terminal ngrok trên RasPi)
+  // 🌍 Địa chỉ ngrok RasPi (chạy ngrok http 5000 để lấy link mới)
   const RASPI_NGROK = "https://kristen-unwarmable-jesenia.ngrok-free.dev";
 
   // 🟢 Kiểm tra kết nối RasPi qua Render
@@ -18,22 +18,26 @@ document.addEventListener("DOMContentLoaded", () => {
       if (res.ok && data.status) {
         statusEl.textContent = "✅ Connected to Raspberry Pi";
         statusEl.style.color = "#00ff66";
-      } else throw new Error("Not OK");
+      } else throw new Error();
     } catch {
       statusEl.textContent = "❌ Cannot connect to Raspberry Pi";
       statusEl.style.color = "#ff3333";
     }
   }
 
-  // 🎥 Hiển thị video stream trực tiếp từ camera RasPi (qua ngrok)
+  // 🎥 Hiển thị camera RasPi (MJPEG stream)
   function startRasPiPreview() {
-    videoEl.src = `${RASPI_NGROK}/video_feed`;
-    videoEl.style.display = "block";
-    statusEl.textContent = "🎥 Live view from Raspberry Pi";
+    cameraImg.src = `${RASPI_NGROK}/video_feed`; // dùng <img> để load MJPEG
+    cameraImg.style.display = "block";
+    cameraImg.style.width = "640px";
+    cameraImg.style.height = "480px";
+    cameraImg.style.borderRadius = "10px";
+    cameraImg.style.border = "2px solid #1a73e8";
+    statusEl.textContent = "🎥 Live stream from Raspberry Pi";
     statusEl.style.color = "#00ffff";
   }
 
-  // 📸 Khi bấm TAKE → Gửi yêu cầu RasPi chụp ảnh & train
+  // 📸 Khi bấm TAKE → gửi yêu cầu RasPi chụp & train
   takeBtn.addEventListener("click", async () => {
     const user = JSON.parse(sessionStorage.getItem("user"));
     const username = user?.name || user?.username || "unknown";
@@ -63,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 🚀 Khi trang tải
+  // 🚀 Khởi động
   checkConnection();
   startRasPiPreview();
 });
