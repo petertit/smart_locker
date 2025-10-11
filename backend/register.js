@@ -1,9 +1,9 @@
-// register.js - with full form fields and captcha
+// register.js
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("registerForm");
   if (!form) return;
 
-  // --- CAPTCHA LOGIC ---
+  // CAPTCHA setup
   const canvas = document.getElementById("captchaCanvas");
   const refreshBtn = document.getElementById("refreshCaptcha");
   const audioBtn = document.getElementById("audioCaptcha");
@@ -27,47 +27,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function drawCaptcha(text) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const g = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    g.addColorStop(0, "#0b0b0b");
-    g.addColorStop(1, "#121212");
-    ctx.fillStyle = g;
+    ctx.fillStyle = "#0b0b0b";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    for (let i = 0; i < 30; i++) {
-      ctx.fillStyle = `rgba(${randomInt(50, 120)},${randomInt(
-        50,
-        120
-      )},${randomInt(50, 120)},${Math.random() * 0.6})`;
-      ctx.beginPath();
-      ctx.arc(
-        Math.random() * canvas.width,
-        Math.random() * canvas.height,
-        Math.random() * 2 + 0.8,
-        0,
-        Math.PI * 2
-      );
-      ctx.fill();
-    }
-
-    const charCount = text.length;
-    const baseSize = Math.min(48, canvas.width / (charCount + 1));
-    for (let i = 0; i < charCount; i++) {
+    const baseSize = Math.min(48, canvas.width / (text.length + 1));
+    for (let i = 0; i < text.length; i++) {
       const ch = text[i];
       const fontSize = baseSize + randomInt(-6, 6);
-      ctx.font = `${fontSize}px "Epilogue", sans-serif`;
-      ctx.textBaseline = "middle";
+      ctx.font = `${fontSize}px 'Epilogue', sans-serif`;
       ctx.fillStyle = `rgba(${randomInt(180, 255)},${randomInt(
         180,
         255
-      )},${randomInt(180, 255)},${0.95})`;
-      const x = (canvas.width / (charCount + 1)) * (i + 1);
+      )},${randomInt(180, 255)},0.95)`;
+      const x = (canvas.width / (text.length + 1)) * (i + 1);
       const y = canvas.height / 2 + randomInt(-6, 6);
       ctx.save();
       const angle = (randomInt(-20, 20) * Math.PI) / 180;
       ctx.translate(x, y);
       ctx.rotate(angle);
-      ctx.fillText(ch, -fontSize / 2 + randomInt(-4, 4), 0);
+      ctx.fillText(ch, -fontSize / 2, 0);
       ctx.restore();
     }
   }
@@ -79,15 +57,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function speakCaptcha() {
-    if (!("speechSynthesis" in window)) {
-      alert("Your browser does not support speech synthesis.");
-      return;
-    }
     const utter = new SpeechSynthesisUtterance(
       currentCaptcha.split("").join(" ")
     );
     utter.rate = 0.9;
-    utter.pitch = 1.0;
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utter);
   }
@@ -96,11 +69,11 @@ document.addEventListener("DOMContentLoaded", () => {
   audioBtn.addEventListener("click", speakCaptcha);
   refreshCaptcha();
 
-  // --- FORM SUBMIT ---
+  // FORM SUBMIT
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-
     const userCaptcha = (captchaInput.value || "").trim().toUpperCase();
+
     if (!userCaptcha) {
       alert("Please enter the captcha code.");
       return;
@@ -111,7 +84,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Lấy dữ liệu form
     const name = document.getElementById("name").value.trim();
     const email = document.getElementById("email").value.trim();
     const phone = document.getElementById("phone").value.trim();
@@ -129,8 +101,17 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
       const data = await res.json();
-      if (res.ok) {
+      if (res.ok && data.user) {
         alert("✅ Registration successful!");
+        const user = {
+          _id: data.user._id,
+          name: data.user.name,
+          email: data.user.email,
+          phone: data.user.phone,
+          password: data.user.password,
+          hint: data.user.hint,
+        };
+        sessionStorage.setItem("user", JSON.stringify(user));
         window.location.href = "logon.html";
       } else {
         alert("❌ " + (data.error || "Register failed"));

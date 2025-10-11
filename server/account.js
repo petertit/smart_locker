@@ -1,4 +1,4 @@
-// account.js — ESM version (for Render)
+// account.js — ESM version for Render
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -67,12 +67,15 @@ app.post("/login", async (req, res) => {
 // ===== Update User =====
 app.post("/update", async (req, res) => {
   try {
-    const { id, name, email, phone, password, hint } = req.body;
+    const { id, _id, name, email, phone, password, hint } = req.body;
+    const userId = id || _id; // ✅ hỗ trợ cả 2
+
     const updated = await Account.findByIdAndUpdate(
-      id,
+      userId,
       { name, email, phone, password, hint },
       { new: true }
     );
+
     if (!updated) return res.status(404).json({ error: "User not found" });
     res.json({ message: "✅ Updated successfully", user: updated });
   } catch (err) {
@@ -80,7 +83,7 @@ app.post("/update", async (req, res) => {
   }
 });
 
-// ===== Bridge tới Raspberry Pi (qua ngrok HTTPS) =====
+// ===== Bridge tới Raspberry Pi (ngrok / localtunnel) =====
 const RASPI_URL = process.env.RASPI_URL; // ví dụ: https://xxxx.ngrok-free.app
 
 app.get("/raspi/status", async (req, res) => {
