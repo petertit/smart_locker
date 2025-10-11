@@ -38,6 +38,14 @@ body {
   width: 100%;
   min-height: 100vh; /* chiếm toàn màn hình (tùy nhu cầu) */
 }
+#cameraPreview {
+  width: 800px;
+  height: 600px;
+  border-radius: 20px;
+  border: 3px solid #1a73e8;
+  box-shadow: 0 0 25px rgba(26, 115, 232, 0.5);
+  object-fit: cover;
+}
 
 .face_scan {
   width: 800px;
