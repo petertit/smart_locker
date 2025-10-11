@@ -1,11 +1,11 @@
-// account.js — ESM version for Render
+// account.js — ESM version with fixed user._id → user.id
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
 
-dotenv.config(); // Load .env (Render Variables)
+dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -46,7 +46,14 @@ app.post("/register", async (req, res) => {
 
     const acc = new Account({ name, email, phone, password, hint });
     await acc.save();
-    res.json({ message: "✅ Register successful", user: acc });
+
+    res.json({
+      message: "✅ Register successful",
+      user: {
+        ...acc.toObject(),
+        id: acc._id.toString(), // ✅ thêm ID chuẩn
+      },
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -58,7 +65,14 @@ app.post("/login", async (req, res) => {
     const { email, password } = req.body;
     const acc = await Account.findOne({ email, password });
     if (!acc) return res.status(401).json({ error: "Invalid credentials" });
-    res.json({ message: "✅ Login successful", user: acc });
+
+    res.json({
+      message: "✅ Login successful",
+      user: {
+        ...acc.toObject(),
+        id: acc._id.toString(), // ✅ thêm ID chuẩn
+      },
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -67,24 +81,28 @@ app.post("/login", async (req, res) => {
 // ===== Update User =====
 app.post("/update", async (req, res) => {
   try {
-    const { id, _id, name, email, phone, password, hint } = req.body;
-    const userId = id || _id; // ✅ hỗ trợ cả 2
-
+    const { id, name, email, phone, password, hint } = req.body;
     const updated = await Account.findByIdAndUpdate(
-      userId,
+      id,
       { name, email, phone, password, hint },
       { new: true }
     );
-
     if (!updated) return res.status(404).json({ error: "User not found" });
-    res.json({ message: "✅ Updated successfully", user: updated });
+
+    res.json({
+      message: "✅ Updated successfully",
+      user: {
+        ...updated.toObject(),
+        id: updated._id.toString(), // ✅ đồng nhất ID trả về
+      },
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// ===== Bridge tới Raspberry Pi (ngrok / localtunnel) =====
-const RASPI_URL = process.env.RASPI_URL; // ví dụ: https://xxxx.ngrok-free.app
+// ===== Bridge tới Raspberry Pi (qua ngrok / localtunnel) =====
+const RASPI_URL = process.env.RASPI_URL;
 
 app.get("/raspi/status", async (req, res) => {
   try {
