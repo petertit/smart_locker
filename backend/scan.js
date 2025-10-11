@@ -3,10 +3,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const videoEl = document.querySelector("#cameraPreview");
   const statusEl = document.querySelector("#status");
 
-  // 🌐 Render server trung gian
+  // 🌐 Render bridge (trung gian GitHub Pages <-> RasPi)
   const BRIDGE_SERVER = "https://smart-locker-kgnx.onrender.com/raspi";
 
-  // 🌍 Ngrok RasPi — copy từ terminal ngrok của bạn!
+  // 🌍 Ngrok link RasPi (sao chép từ terminal ngrok)
   const RASPI_NGROK = "https://kristen-unwarmable-jesenia.ngrok-free.dev";
 
   // 🟢 Kiểm tra kết nối Render Bridge
@@ -23,12 +23,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // 🎥 Mở video stream từ RasPi qua ngrok
+  // 🎥 Mở video stream trực tiếp từ RasPi
   function startVideoStream() {
-    videoEl.src = `${RASPI_NGROK}/video_feed`; // trực tiếp từ RasPi
+    videoEl.src = `${RASPI_NGROK}/video_feed`; // MJPEG stream
   }
 
-  // 🔄 Gọi nhận diện khuôn mặt (qua Render → RasPi)
+  // 🔄 Nhận diện khuôn mặt định kỳ
   async function pollRecognition() {
     try {
       const res = await fetch(`${BRIDGE_SERVER}/recognize`);
@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(pollRecognition, 3000);
   }
 
-  // 🚀 Khởi động
+  // 🚀 Khởi chạy
   checkConnection();
   startVideoStream();
   pollRecognition();
