@@ -5,4 +5,5 @@ những vc cần làm :
 2. lưu trên server: 
 + 1 tài khoản 1 khuôn mặt
 + 1 tài khoản 1 mã tủ
++ lưu tủ đã chọn
 3. nhận diện khuôn măt thành công trên web

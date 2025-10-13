@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const BRIDGE_SERVER = "https://smart-locker-kgnx.onrender.com/raspi";
 
   // 🌍 Ngrok link RasPi (sao chép từ terminal ngrok)
-  const RASPI_NGROK = "https://kristen-unwarmable-jesenia.ngrok-free.dev";
+  const RASPI_NGROK = "https://superbenevolent-maya-preroyally.ngrok-free.app";
 
   // 🟢 Kiểm tra kết nối Render Bridge
   async function checkConnection() {
