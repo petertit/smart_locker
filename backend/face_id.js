@@ -40,7 +40,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // 📸 Khi bấm TAKE → gửi yêu cầu RasPi chụp & train
   takeBtn.addEventListener("click", async () => {
     const user = JSON.parse(sessionStorage.getItem("user"));
-    const username = user?.name || user?.username || "unknown";
+    const rawUsername = user?.name || user?.username || "unknown";
+
+    // ✅ Chuẩn hóa tên: thay khoảng trắng bằng _, chữ thường
+    const username = rawUsername.replace(/\s/g, "_").toLowerCase();
 
     statusEl.textContent = "📸 Capturing photo from Raspberry Pi...";
     statusEl.style.color = "#ffaa00";
@@ -49,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await fetch(`${BRIDGE_SERVER}/capture`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: username }),
+        body: JSON.stringify({ name: username }), // Gửi tên đã chuẩn hóa
       });
       const data = await res.json();
 
@@ -71,3 +74,4 @@ document.addEventListener("DOMContentLoaded", () => {
   checkConnection();
   startRasPiPreview();
 });
+// backend/scan.js
