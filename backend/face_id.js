@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const cameraWrapper = document.querySelector(".face-scan-wrapper");
   const statusEl = document.querySelector("#status");
   const BRIDGE_SERVER = "https://smart-locker-kgnx.onrender.com/raspi";
-  const RASPI_NGROK = "https://superbenevolent-maya-preroyally.ngrok-free.dev"; // ✅ Đã thêm lại Ngrok URL
+  const RASPI_NGROK = "https://adelaida-gymnogynous-gnostically.ngrok-free.dev"; // ✅ Đã thêm lại Ngrok URL
   const LOCAL_IP_CHECK = ["localhost", "127.0.0.1", "192.168."];
   const MAX_SUCCESS_CAPTURES = 5;
 
