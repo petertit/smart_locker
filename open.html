@@ -35,46 +35,48 @@
       <p id="row1">Work</p>
       <h1>Open Locker</h1>
 
-      <p id="row3">
-        Please keep your face in position for recognition scanning
-      </p>
+      <p id="row3">Vui lòng chọn một tủ khóa để đăng nhập và mở</p>
     </div>
   </head>
   <body>
     <!-- Content -->
     <div class="face-grid-section">
       <div class="grid-container">
-        <a href="./face_log.html" class="grid-item">
+        <!-- ✅ Thêm data-locker-id cho mỗi tủ -->
+        <!-- Bỏ href="./face_log.html" để JavaScript xử lý việc chuyển hướng -->
+        <a href="#" class="grid-item" data-locker-id="01">
           <span>01</span>
         </a>
-        <a href="./face_log.html" class="grid-item">
+        <a href="#" class="grid-item" data-locker-id="02">
           <span>02</span>
         </a>
-        <a href="./face_log.html" class="grid-item">
+        <a href="#" class="grid-item" data-locker-id="03">
           <span>03</span>
         </a>
-        <a href="./face_log.html" class="grid-item">
+        <a href="#" class="grid-item" data-locker-id="04">
           <span>04</span>
         </a>
-        <a href="./face_log.html" class="grid-item">
+        <a href="#" class="grid-item" data-locker-id="05">
           <span>05</span>
         </a>
-        <a href="./face_log.html" class="grid-item">
+        <a href="#" class="grid-item" data-locker-id="06">
           <span>06</span>
         </a>
-        <a href="./face_log.html" class="grid-item">
+        <a href="#" class="grid-item" data-locker-id="07">
           <span>07</span>
         </a>
-        <a href="./face_log.html" class="grid-item">
+        <a href="#" class="grid-item" data-locker-id="08">
           <span>08</span>
         </a>
-        <a href="./face_log.html" class="grid-item">
+        <a href="#" class="grid-item" data-locker-id="09">
           <span>09</span>
         </a>
       </div>
     </div>
     <!-- script -->
     <script src="./backend/auth_protect.js"></script>
+    <script src="./backend/open.js"></script>
+    <!-- ✅ Liên kết open.js -->
   </body>
   <!-- footer -->
   <footer class="footer">

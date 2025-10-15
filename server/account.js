@@ -295,7 +295,90 @@ app.post("/update", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// ===== ✅ LOCKER MANAGEMENT ENDPOINTS (NEW) =====
 
+// 1. Lấy trạng thái tất cả tủ khóa
+app.get("/lockers/status", async (req, res) => {
+  try {
+    const lockers = await Locker.find(
+      {},
+      { lockerId: 1, status: 1, userId: 1, _id: 0 }
+    );
+    res.json(lockers);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error fetching locker status", error: err.message });
+  }
+});
+
+// 2. Cập nhật trạng thái tủ khóa (Mở hoặc Khóa)
+app.post("/lockers/update", async (req, res) => {
+  try {
+    const { lockerId, status, userId } = req.body;
+
+    const currentLocker = await Locker.findOne({ lockerId });
+
+    if (!currentLocker) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Locker not found." });
+    }
+
+    let newUserId =
+      status === "OPEN"
+        ? userId
+        : currentLocker.status === "OPEN"
+        ? currentLocker.userId
+        : null;
+    if (status === "LOCKED" && currentLocker.userId) {
+      // Khi đóng, tủ vẫn thuộc về userId, chỉ đổi trạng thái
+      newUserId = currentLocker.userId;
+    }
+    if (status === "EMPTY") {
+      // Khi trống, xóa userId
+      newUserId = null;
+    }
+
+    // Kiểm tra logic phức tạp
+    if (status === "OPEN" && newUserId) {
+      // Nếu tủ bị người khác chiếm (LOCKED hoặc OPEN)
+      if (
+        currentLocker.status !== "EMPTY" &&
+        currentLocker.userId &&
+        currentLocker.userId !== newUserId
+      ) {
+        return res
+          .status(403)
+          .json({
+            success: false,
+            message: "Tủ đã được đăng ký/sử dụng bởi người khác.",
+          });
+      }
+    }
+
+    // Cập nhật trạng thái và chủ sở hữu
+    const updatedLocker = await Locker.findOneAndUpdate(
+      { lockerId },
+      { status: status, userId: newUserId },
+      { new: true }
+    );
+
+    res.json({
+      success: true,
+      message: `Locker ${lockerId} status updated to ${status}`,
+      locker: updatedLocker,
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Server error during locker update",
+        error: err.message,
+      });
+  }
+});
 // ===== Bridge tới Raspberry Pi (qua ngrok / localtunnel) =====
 const RASPI_URL = process.env.RASPI_URL;
 

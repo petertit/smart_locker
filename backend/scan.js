@@ -135,6 +135,13 @@ document.addEventListener("DOMContentLoaded", () => {
       statusEl.style.color = "#ff3333";
     }
   }
-
+  // Trong hàm handleRecognitionResult(data) của scan.js, sau khi nhận diện thành công:
+  if (data.success && data.name && data.name === currentUser.name) {
+    // ... logic hiển thị thành công ...
+    const lockerId = sessionStorage.getItem("locker_to_open");
+    if (lockerId) {
+      window.openLockerSuccess(lockerId); // GỌI HÀM NÀY
+    }
+  }
   setupCameraInterface();
 });
