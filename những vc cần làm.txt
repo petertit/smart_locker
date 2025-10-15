@@ -6,4 +6,5 @@ những vc cần làm :
 + 1 tài khoản 1 khuôn mặt
 + 1 tài khoản 1 mã tủ
 + lưu tủ đã chọn
-3. nhận diện khuôn măt thành công trên web
+3. nhận diện khuôn măt thành công trên web (hoàn thành)
+4.tôi bị bug khi  đã đăng ký mã khóa tủ, nhưng khi đăng xuất ra vào lại tài khoản thì không lưu mã khóa tủ đã đăng ký trước đó tôi muốn lưu mã đăng ký mã khóa tủ , dù đăng xuất ra nhưng khi vô lại vẫn lưu mã khóa tủ , có thể thay đổi mã khóa tủ trong trang detail 
