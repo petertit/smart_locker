@@ -10,14 +10,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const lockerId = sessionStorage.getItem("locker_to_open");
 
   if (!currentUser) {
-    alert("⚠️ Vui lòng đăng nhập tài khoản trước.");
+    // Tùy chọn: Chuyển hướng về trang Open để người dùng chọn tủ lại
     window.location.href = "logon.html";
+    alert("⚠️ Vui lòng đăng nhập tài khoản trước.");
     return;
   }
 
   if (!lockerId) {
-    alert("⚠️ Vui lòng chọn tủ khóa trước khi đăng nhập.");
     window.location.href = "open.html";
+    alert("⚠️ Vui lòng chọn tủ khóa trước khi đăng nhập.");
     return;
   }
 
@@ -28,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputLockerCode = lockerCodeInput.value.trim();
 
     // 2. So sánh mã khóa
+    // Lấy mã khóa từ session (đã được lưu khi đăng nhập chính hoặc cập nhật từ detail/pass_lock.js)
     const registeredLockerCode = currentUser.lockerCode;
 
     if (!registeredLockerCode) {
@@ -39,15 +41,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (inputLockerCode === registeredLockerCode) {
       // 3. Đăng nhập thành công -> Gọi hàm mở tủ (đã định nghĩa trong open.js)
+
+      // Xóa mã khóa khỏi input sau khi xác thực
+      lockerCodeInput.value = "";
+
       if (window.openLockerSuccess) {
         alert(
           `✅ Xác thực mã khóa thành công cho tủ ${lockerId}. Đang mở tủ...`
         );
-        // openLockerSuccess sẽ cập nhật trạng thái trên server và chuyển hướng
+        // openLockerSuccess sẽ gửi yêu cầu server mở tủ và chuyển hướng về open.html
         window.openLockerSuccess(lockerId);
       } else {
         alert(
-          "✅ Xác thực thành công nhưng không tìm thấy hàm mở tủ (open.js chưa load)."
+          "✅ Xác thực thành công nhưng không tìm thấy hàm mở tủ (open.js chưa load). Vui lòng tải lại trang Open."
         );
       }
     } else {
@@ -55,3 +61,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+//   // ✅ Cập nhật sessionStorage
+//   sessionStorage.setItem("user", JSON.stringify(updatedUser));
