@@ -1,77 +1,50 @@
-// backend/pass_lock.js - Logic đăng ký và cập nhật mật khẩu tủ khóa
+// pass_lock.js — Đăng ký hoặc cập nhật mã khóa tủ (lockerCode)
 document.addEventListener("DOMContentLoaded", () => {
-  // 🌐 Địa chỉ Render Bridge (Backend Node.js)
-  const RENDER_BRIDGE = "https://smart-locker-kgnx.onrender.com";
-  const form = document.getElementById("lockerRegisterForm");
-  const statusMessage = document.createElement("p");
-
-  // 🔒 Kiểm tra đăng nhập
-  const userRaw = sessionStorage.getItem("user");
-  if (!userRaw) {
-    alert("⚠️ Bạn phải đăng nhập trước để đăng ký mã khóa.");
+  const user = JSON.parse(sessionStorage.getItem("user"));
+  if (!user) {
+    alert("⚠️ Bạn cần đăng nhập trước khi đặt mã khóa tủ!");
     window.location.href = "logon.html";
     return;
   }
-  const user = JSON.parse(userRaw);
 
-  // Thêm thông báo trạng thái dưới form
-  statusMessage.style.textAlign = "center";
-  statusMessage.style.marginTop = "15px";
-  statusMessage.style.fontSize = "14px";
-  statusMessage.style.color = "#ffaa00";
-  form.parentNode.insertBefore(statusMessage, form.nextSibling);
+  const form = document.getElementById("lockerRegisterForm");
+  const input = document.getElementById("password");
+  const row3 = document.getElementById("row3");
+
+  // Hiển thị mã cũ (nếu có)
+  if (user.lockerCode) {
+    row3.textContent = `🔒 Mã hiện tại: ${user.lockerCode}`;
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    statusMessage.textContent = "🔄 Đang đăng ký/cập nhật mã khóa...";
-    statusMessage.style.color = "#ffaa00";
-
-    const lockerCode = document.getElementById("password").value.trim();
-
-    if (lockerCode.length < 4) {
-      statusMessage.textContent = "❌ Mã khóa phải có ít nhất 4 ký tự.";
-      statusMessage.style.color = "#ff3333";
+    const newCode = input.value.trim();
+    if (!newCode) {
+      alert("⚠️ Vui lòng nhập mã khóa tủ!");
       return;
     }
 
-    // Dữ liệu mới để gửi lên server (chỉ gửi ID và mã khóa)
-    const updatePayload = {
-      id: user._id || user.id, // Lấy ID chuẩn của user
-      lockerCode: lockerCode, // Trường mới
-    };
-
     try {
-      // Gửi yêu cầu cập nhật thông qua endpoint /update
-      const response = await fetch(`${RENDER_BRIDGE}/update`, {
+      const res = await fetch("https://smart-locker-kgnx.onrender.com/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatePayload),
+        body: JSON.stringify({
+          id: user._id || user.id,
+          lockerCode: newCode,
+        }),
       });
 
-      const result = await response.json();
-
-      if (response.ok && result.user) {
-        // ✅ Cập nhật sessionStorage thành công
-        const updatedUser = { ...user, ...result.user };
-        sessionStorage.setItem("user", JSON.stringify(updatedUser));
-
-        statusMessage.textContent = "✅ Đăng ký mã khóa thành công!";
-        statusMessage.style.color = "#00ff66";
-        alert(
-          "Đăng ký mã khóa tủ thành công! Bạn có thể sử dụng mã này để đăng nhập."
-        );
-
-        // Chuyển hướng về trang menu hoặc trang chính
-        window.location.href = "./menu.html";
+      const data = await res.json();
+      if (res.ok && data.user) {
+        sessionStorage.setItem("user", JSON.stringify(data.user));
+        row3.textContent = `✅ Mã khóa tủ đã lưu: ${newCode}`;
+        alert("✅ Đăng ký mã khóa tủ thành công!");
+        input.value = "";
       } else {
-        statusMessage.textContent = `❌ Lỗi: ${
-          result.error || "Cập nhật thất bại."
-        }`;
-        statusMessage.style.color = "#ff3333";
+        alert("❌ " + (data.error || "Không thể lưu mã khóa tủ"));
       }
-    } catch (error) {
-      statusMessage.textContent = `❌ Lỗi kết nối server: ${error.message}`;
-      statusMessage.style.color = "#ff3333";
+    } catch (err) {
+      alert("❌ Lỗi kết nối: " + err.message);
     }
   });
 });

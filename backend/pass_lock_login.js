@@ -1,65 +1,45 @@
-const RENDER_BRIDGE = "https://smart-locker-kgnx.onrender.com";
-
+// pass_lock_login.js — Kiểm tra mã khóa tủ & mở tủ
 document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("loginLockerForm");
-  const lockerCodeInput = document.getElementById("lockerCode");
-
-  // 1. Kiểm tra trạng thái cần thiết
-  const userRaw = sessionStorage.getItem("user");
-  const currentUser = userRaw ? JSON.parse(userRaw) : null;
-  const lockerId = sessionStorage.getItem("locker_to_open");
-
-  if (!currentUser) {
-    // Tùy chọn: Chuyển hướng về trang Open để người dùng chọn tủ lại
+  const user = JSON.parse(sessionStorage.getItem("user"));
+  if (!user) {
+    alert("⚠️ Bạn cần đăng nhập trước khi mở tủ!");
     window.location.href = "logon.html";
-    alert("⚠️ Vui lòng đăng nhập tài khoản trước.");
     return;
   }
 
-  if (!lockerId) {
-    window.location.href = "open.html";
-    alert("⚠️ Vui lòng chọn tủ khóa trước khi đăng nhập.");
-    return;
-  }
-
-  if (!form) return;
+  const form = document.getElementById("loginLockerForm");
+  const input = document.getElementById("lockerCode");
+  const row3 = document.getElementById("row3");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const inputLockerCode = lockerCodeInput.value.trim();
+    const entered = input.value.trim();
 
-    // 2. So sánh mã khóa
-    // Lấy mã khóa từ session (đã được lưu khi đăng nhập chính hoặc cập nhật từ detail/pass_lock.js)
-    const registeredLockerCode = currentUser.lockerCode;
-
-    if (!registeredLockerCode) {
-      alert(
-        "❌ Lỗi: Tài khoản của bạn chưa đăng ký mã khóa tủ. Vui lòng đăng ký trong trang Detail hoặc Pass Lock."
-      );
+    if (!entered) {
+      alert("⚠️ Vui lòng nhập mã khóa tủ!");
       return;
     }
 
-    if (inputLockerCode === registeredLockerCode) {
-      // 3. Đăng nhập thành công -> Gọi hàm mở tủ (đã định nghĩa trong open.js)
+    if (entered === user.lockerCode) {
+      row3.textContent = "✅ Mã chính xác — tủ đang mở...";
+      row3.style.color = "#00ff66";
+      alert("✅ Mở tủ thành công!");
 
-      // Xóa mã khóa khỏi input sau khi xác thực
-      lockerCodeInput.value = "";
-
-      if (window.openLockerSuccess) {
-        alert(
-          `✅ Xác thực mã khóa thành công cho tủ ${lockerId}. Đang mở tủ...`
-        );
-        // openLockerSuccess sẽ gửi yêu cầu server mở tủ và chuyển hướng về open.html
-        window.openLockerSuccess(lockerId);
-      } else {
-        alert(
-          "✅ Xác thực thành công nhưng không tìm thấy hàm mở tủ (open.js chưa load). Vui lòng tải lại trang Open."
-        );
+      // 👉 Gửi tín hiệu mở khóa về Raspberry Pi (nếu có endpoint)
+      try {
+        await fetch("https://smart-locker-kgnx.onrender.com/raspi/unlock", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user: user.email }),
+        });
+      } catch (err) {
+        console.warn("⚠️ Không thể gửi lệnh mở khóa:", err.message);
       }
     } else {
-      alert("❌ Mã khóa tủ không chính xác.");
+      row3.textContent = "❌ Mã khóa không đúng!";
+      row3.style.color = "#ff3333";
     }
+
+    input.value = "";
   });
 });
-//   // ✅ Cập nhật sessionStorage
-//   sessionStorage.setItem("user", JSON.stringify(updatedUser));
