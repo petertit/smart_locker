@@ -211,12 +211,29 @@ const accountSchema = new mongoose.Schema(
     phone: String,
     password: String,
     hint: String,
-    lockerCode: String, // ✅ thêm dòng này
+    lockerCode: { type: String, default: "" }, // ✅ thêm lockerCode
   },
   { collection: "account" }
 );
 
 const Account = mongoose.model("Account", accountSchema);
+
+// ===== Login =====
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const acc = await Account.findOne({ email, password }).lean(); // dùng .lean() để trả JSON đầy đủ
+
+    if (!acc) return res.status(401).json({ error: "Invalid credentials" });
+
+    // ✅ Đảm bảo có lockerCode trong phản hồi, kể cả khi chưa có
+    if (!acc.lockerCode) acc.lockerCode = "";
+
+    res.json({ message: "✅ Login successful", user: acc });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // ===== Register =====
 app.post("/register", async (req, res) => {
@@ -231,19 +248,6 @@ app.post("/register", async (req, res) => {
     const acc = new Account({ name, email, phone, password, hint });
     await acc.save();
     res.json({ message: "✅ Đăng ký thành công", user: acc });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ===== Login =====
-app.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const acc = await Account.findOne({ email, password });
-    if (!acc)
-      return res.status(401).json({ error: "Sai tài khoản hoặc mật khẩu" });
-    res.json({ message: "✅ Đăng nhập thành công", user: acc });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
