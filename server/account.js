@@ -211,10 +211,11 @@ const accountSchema = new mongoose.Schema(
     phone: String,
     password: String,
     hint: String,
-    lockerCode: { type: String, default: null }, // ✅ mã khóa tủ
+    lockerCode: String, // ✅ thêm dòng này
   },
   { collection: "account" }
 );
+
 const Account = mongoose.model("Account", accountSchema);
 
 // ===== Register =====
@@ -251,15 +252,14 @@ app.post("/login", async (req, res) => {
 // ===== Update User (bao gồm lockerCode) =====
 app.post("/update", async (req, res) => {
   try {
-    const { id, name, email, phone, password, hint, lockerCode } = req.body;
+    const { id, name, email, phone, password, hint, lockerCode } = req.body; // ✅ thêm lockerCode
     const updated = await Account.findByIdAndUpdate(
       id,
-      { name, email, phone, password, hint, lockerCode },
+      { name, email, phone, password, hint, lockerCode }, // ✅ thêm lockerCode
       { new: true }
     );
-    if (!updated)
-      return res.status(404).json({ error: "Không tìm thấy người dùng" });
-    res.json({ message: "✅ Cập nhật thành công", user: updated });
+    if (!updated) return res.status(404).json({ error: "User not found" });
+    res.json({ message: "✅ Updated successfully", user: updated });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
