@@ -226,7 +226,10 @@ app.post("/login", async (req, res) => {
 
     if (!acc) return res.status(401).json({ error: "Invalid credentials" });
 
-    // ✅ Đảm bảo có lockerCode trong phản hồi, kể cả khi chưa có
+    // ✅ Thêm dòng này để frontend luôn có ID
+    acc.id = acc._id.toString();
+
+    // ✅ Đảm bảo có lockerCode trong phản hồi
     if (!acc.lockerCode) acc.lockerCode = "";
 
     res.json({ message: "✅ Login successful", user: acc });
@@ -256,13 +259,19 @@ app.post("/register", async (req, res) => {
 // ===== Update User (bao gồm lockerCode) =====
 app.post("/update", async (req, res) => {
   try {
-    const { id, name, email, phone, password, hint, lockerCode } = req.body; // ✅ thêm lockerCode
+    const { id, name, email, phone, password, hint, lockerCode } = req.body;
+
     const updated = await Account.findByIdAndUpdate(
       id,
-      { name, email, phone, password, hint, lockerCode }, // ✅ thêm lockerCode
+      { name, email, phone, password, hint, lockerCode },
       { new: true }
-    );
+    ).lean();
+
     if (!updated) return res.status(404).json({ error: "User not found" });
+
+    // ✅ Thêm dòng này để trả về id thống nhất
+    updated.id = updated._id.toString();
+
     res.json({ message: "✅ Updated successfully", user: updated });
   } catch (err) {
     res.status(500).json({ error: err.message });
