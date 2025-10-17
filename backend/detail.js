@@ -101,16 +101,24 @@
 // });
 // detail.js — Quản lý thông tin tài khoản & mã khóa tủ
 // detail.js — Quản lý tài khoản & mã khóa tủ (locker code)
-document.addEventListener("DOMContentLoaded", () => {
-  // 🔒 Kiểm tra đăng nhập
-  const user = JSON.parse(sessionStorage.getItem("user"));
-  if (!user) {
+document.addEventListener("DOMContentLoaded", async () => {
+  const localUser = JSON.parse(sessionStorage.getItem("user"));
+  if (!localUser) {
     alert("⚠️ Bạn cần đăng nhập trước.");
     window.location.href = "logon.html";
     return;
   }
 
-  // 🧩 Gán phần tử HTML
+  // 🧠 Tải lại user từ server (đảm bảo lockerCode mới nhất)
+  const res = await fetch(
+    `https://smart-locker-kgnx.onrender.com/user/${localUser.id}`
+  );
+  const data = await res.json();
+  const user = data.user || localUser; // nếu server lỗi thì dùng bản cũ
+
+  // 🔁 Cập nhật lại sessionStorage
+  sessionStorage.setItem("user", JSON.stringify(user));
+
   const nameEl = document.getElementById("name");
   const emailEl = document.getElementById("email");
   const phoneEl = document.getElementById("phone");
@@ -118,12 +126,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const hintEl = document.getElementById("hint");
   const lockerCodeEl = document.getElementById("lockerCode");
 
-  const changeBtn = document.getElementById("change-btn");
-  const saveBtn = document.getElementById("save-btn");
-  const logoutBtn = document.getElementById("logout-btn");
-  const backBtn = document.getElementById("back-btn");
-
-  // 🔍 Hiển thị thông tin hiện tại
   nameEl.textContent = user.name || "";
   emailEl.textContent = user.email || "";
   phoneEl.textContent = user.phone || "";

@@ -222,15 +222,15 @@ const Account = mongoose.model("Account", accountSchema);
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const acc = await Account.findOne({ email, password }).lean(); // dùng .lean() để trả JSON đầy đủ
+    const acc = await Account.findOne({ email, password }).lean();
 
     if (!acc) return res.status(401).json({ error: "Invalid credentials" });
 
-    // ✅ Thêm dòng này để frontend luôn có ID
-    acc.id = acc._id.toString();
-
-    // ✅ Đảm bảo có lockerCode trong phản hồi
+    // ✅ Thêm bảo vệ lockerCode
     if (!acc.lockerCode) acc.lockerCode = "";
+
+    acc.id = acc._id.toString(); // Cho frontend dễ dùng
+    delete acc._id;
 
     res.json({ message: "✅ Login successful", user: acc });
   } catch (err) {
@@ -273,6 +273,17 @@ app.post("/update", async (req, res) => {
     updated.id = updated._id.toString();
 
     res.json({ message: "✅ Updated successfully", user: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+app.get("/user/:id", async (req, res) => {
+  try {
+    const user = await Account.findById(req.params.id).lean();
+    if (!user) return res.status(404).json({ error: "User not found" });
+    user.id = user._id.toString();
+    delete user._id;
+    res.json({ user });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
