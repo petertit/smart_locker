@@ -100,8 +100,9 @@
 //   // });
 // });
 // detail.js — Quản lý thông tin tài khoản & mã khóa tủ
-// detail.js — Quản lý tài khoản & mã khóa tủ
+// detail.js — Quản lý tài khoản & mã khóa tủ (locker code)
 document.addEventListener("DOMContentLoaded", () => {
+  // 🔒 Kiểm tra đăng nhập
   const user = JSON.parse(sessionStorage.getItem("user"));
   if (!user) {
     alert("⚠️ Bạn cần đăng nhập trước.");
@@ -109,6 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  // 🧩 Gán phần tử HTML
   const nameEl = document.getElementById("name");
   const emailEl = document.getElementById("email");
   const phoneEl = document.getElementById("phone");
@@ -121,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const logoutBtn = document.getElementById("logout-btn");
   const backBtn = document.getElementById("back-btn");
 
-  // Hiển thị thông tin
+  // 🔍 Hiển thị thông tin hiện tại
   nameEl.textContent = user.name || "";
   emailEl.textContent = user.email || "";
   phoneEl.textContent = user.phone || "";
@@ -130,20 +132,21 @@ document.addEventListener("DOMContentLoaded", () => {
   if (lockerCodeEl)
     lockerCodeEl.textContent = user.lockerCode || "Chưa thiết lập";
 
-  // Cho phép chỉnh sửa
+  // ✏️ Cho phép chỉnh sửa
   changeBtn.addEventListener("click", () => {
     [nameEl, emailEl, phoneEl, passwordEl, hintEl, lockerCodeEl].forEach(
       (el) => {
         if (el) {
           el.contentEditable = true;
           el.style.borderBottom = "2px solid #0063ff";
+          el.style.outline = "none";
         }
       }
     );
     saveBtn.style.display = "inline-block";
   });
 
-  // Lưu lại
+  // 💾 Lưu lại dữ liệu (bao gồm lockerCode)
   saveBtn.addEventListener("click", async () => {
     const newData = {
       name: nameEl.textContent.trim(),
@@ -172,7 +175,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await res.json();
       if (res.ok && data.user) {
         alert("✅ Cập nhật thành công!");
+
+        // 🧠 Cập nhật lại sessionStorage để giữ lockerCode
         sessionStorage.setItem("user", JSON.stringify(data.user));
+
+        // 🔒 Khóa lại ô nhập
         [nameEl, emailEl, phoneEl, passwordEl, hintEl, lockerCodeEl].forEach(
           (el) => {
             if (el) {
@@ -190,7 +197,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // 🔙 Quay lại menu
   backBtn.addEventListener("click", () => (window.location.href = "menu.html"));
+
+  // 🚪 Đăng xuất
   logoutBtn.addEventListener("click", () => {
     sessionStorage.removeItem("user");
     alert("🔓 Bạn đã đăng xuất!");
