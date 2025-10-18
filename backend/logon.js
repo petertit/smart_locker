@@ -24,16 +24,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await res.json();
 
       if (res.ok && data.user) {
-        // ✅ Lưu user kèm _id
-        const user = {
-          _id: data.user._id,
-          name: data.user.name,
-          email: data.user.email,
-          phone: data.user.phone,
-          password: data.user.password,
-          hint: data.user.hint,
-        };
-        sessionStorage.setItem("user", JSON.stringify(user));
+        // ✅ LƯU TRỰC TIẾP user object CHUẨN HÓA từ server (có user.id và user.lockerCode)
+        sessionStorage.setItem("user", JSON.stringify(data.user));
 
         alert("✅ Login successful!");
         window.location.href = "index.html";

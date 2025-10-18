@@ -182,7 +182,6 @@
 // );
 
 // account.js — Render server (ESM) with lockerCode & RasPi bridge
-// account.js — Render server (ESM) with lockerCode & RasPi bridge
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -224,7 +223,7 @@ const prepareUser = (acc) => {
   if (!acc) return null;
   // Sử dụng .lean() khi fetch từ DB để có thể sửa đổi Object dễ dàng
   const userObj = acc.toObject ? acc.toObject() : acc;
-  userObj.id = userObj._id.toString();
+  userObj.id = userObj._id.toString(); // ✅ Đảm bảo trường ID chuẩn hóa
   delete userObj._id;
   if (userObj.lockerCode === undefined) userObj.lockerCode = null;
   return userObj;
@@ -300,6 +299,94 @@ app.get("/user/:id", async (req, res) => {
     res.json({ user: prepareUser(user) });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// ===== Locker State Schema and Endpoints (from previous step) =====
+const lockerStateSchema = new mongoose.Schema(
+  {
+    lockerId: { type: String, required: true, unique: true },
+    status: {
+      type: String,
+      enum: ["EMPTY", "LOCKED", "OPEN"],
+      default: "EMPTY",
+    },
+    ownerId: { type: String, default: null }, // ID của người đang thuê/mở
+    timestamp: { type: Date, default: Date.now },
+  },
+  { collection: "locker_states" }
+);
+const LockerState = mongoose.model("LockerState", lockerStateSchema);
+
+// Endpoint 1: Lấy trạng thái tất cả tủ
+app.get("/lockers/status", async (req, res) => {
+  try {
+    // Khởi tạo các tủ nếu chưa có (1 đến 9)
+    const allLockers = await LockerState.find().lean();
+    const initialLockers = [];
+    for (let i = 1; i <= 9; i++) {
+      const id = i.toString().padStart(2, "0");
+      const exists = allLockers.find((l) => l.lockerId === id);
+      if (!exists) {
+        await LockerState.updateOne(
+          { lockerId: id },
+          { $setOnInsert: { lockerId: id, status: "EMPTY", ownerId: null } },
+          { upsert: true }
+        );
+      }
+    }
+
+    const finalLockers = await LockerState.find().lean();
+    res.json({
+      success: true,
+      lockers: finalLockers.map((l) => ({
+        lockerId: l.lockerId,
+        status: l.status,
+        ownerId: l.ownerId,
+      })),
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .json({
+        success: false,
+        error: "Lỗi khi tải trạng thái tủ: " + err.message,
+      });
+  }
+});
+
+// Endpoint 2: Cập nhật trạng thái tủ
+app.post("/lockers/update", async (req, res) => {
+  try {
+    const { lockerId, status, ownerId } = req.body;
+
+    const updatedLocker = await LockerState.findOneAndUpdate(
+      { lockerId },
+      { status, ownerId: ownerId || null, timestamp: new Date() },
+      { new: true }
+    ).lean();
+
+    if (!updatedLocker) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Không tìm thấy tủ: " + lockerId });
+    }
+
+    res.json({
+      success: true,
+      locker: {
+        lockerId: updatedLocker.lockerId,
+        status: updatedLocker.status,
+        ownerId: updatedLocker.ownerId,
+      },
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .json({
+        success: false,
+        error: "Lỗi khi cập nhật trạng thái tủ: " + err.message,
+      });
   }
 });
 
