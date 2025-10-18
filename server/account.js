@@ -346,12 +346,10 @@ app.get("/lockers/status", async (req, res) => {
       })),
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: "Lỗi khi tải trạng thái tủ: " + err.message,
-      });
+    res.status(500).json({
+      success: false,
+      error: "Lỗi khi tải trạng thái tủ: " + err.message,
+    });
   }
 });
 
@@ -381,12 +379,10 @@ app.post("/lockers/update", async (req, res) => {
       },
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: "Lỗi khi cập nhật trạng thái tủ: " + err.message,
-      });
+    res.status(500).json({
+      success: false,
+      error: "Lỗi khi cập nhật trạng thái tủ: " + err.message,
+    });
   }
 });
 
@@ -418,7 +414,24 @@ app.post("/raspi/capture", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
+// ✅ ✅ ✅ THÊM ĐOẠN MÃ NÀY VÀO ✅ ✅ ✅
+// ENDPOINT MỚI: Gửi lệnh mở khóa vật lý
+app.post("/raspi/unlock", async (req, res) => {
+  try {
+    // Chuyển tiếp (forward) request đến RASPI_URL
+    const r = await fetch(`${RASPI_URL}/unlock`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req.body), // Gửi thông tin (lockerId, user)
+    });
+    const data = await r.json();
+    res.json(data); // Gửi phản hồi từ Pi về lại cho client
+  } catch (err) {
+    // Nếu Pi bị lỗi hoặc offline, vẫn trả về JSON
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+// ✅ ✅ ✅ KẾT THÚC ĐOẠN MÃ CẦN THÊM ✅ ✅ ✅
 // ✅ ENDPOINT MỚI: Chụp 5 ảnh từ RasPi Cam
 app.post("/raspi/capture-batch", async (req, res) => {
   try {
