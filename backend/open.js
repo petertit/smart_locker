@@ -4,7 +4,7 @@ const LOCKER_COUNT = 9; // Tổng số tủ khóa (01 đến 09)
 // Lấy thông tin người dùng đang đăng nhập
 const userRaw = sessionStorage.getItem("user");
 const currentUser = userRaw ? JSON.parse(userRaw) : null;
-// ✅ SỬA LỖI: Đã chuẩn hóa ID, chỉ cần dùng user.id
+// Đã chuẩn hóa ID từ server (trong logon.js), chỉ cần dùng user.id
 const currentUserId = currentUser ? currentUser.id : null;
 
 // Biến lưu trữ trạng thái tủ khóa toàn cục (lockerId -> {status, userId})
@@ -18,7 +18,7 @@ async function fetchLockerStates() {
 
     const data = await res.json(); // data là { success: true, lockers: [...] }
 
-    // ✅ SỬA LỖI 1: Phải truy cập data.lockers (là mảng)
+    // Phải truy cập data.lockers (là mảng)
     if (!data.lockers || !Array.isArray(data.lockers)) {
       throw new Error("Invalid data structure from server");
     }
@@ -26,7 +26,7 @@ async function fetchLockerStates() {
     lockerStates = data.lockers.reduce((acc, locker) => {
       acc[locker.lockerId] = {
         status: locker.status,
-        // ✅ SỬA LỖI 2: Server trả về 'ownerId', không phải 'userId'
+        // Server trả về 'ownerId'
         userId: locker.ownerId,
       };
       return acc;
@@ -35,7 +35,6 @@ async function fetchLockerStates() {
     updateGridUI();
   } catch (err) {
     console.error("Error loading locker states:", err);
-    // Thêm chi tiết lỗi vào alert
     alert("Không thể tải trạng thái tủ khóa: " + err.message);
   }
 }
@@ -43,8 +42,8 @@ async function fetchLockerStates() {
 async function updateLockerStatus(lockerId, newStatus) {
   if (!currentUserId) return;
 
-  // Khi đóng tủ (LOCKED), ta không cần gửi ownerId nữa (server sẽ tự gán null)
   // Khi mở tủ (OPEN), ta gán ownerId là mình
+  // Khi đóng tủ (LOCKED), ta gán ownerId là null
   const ownerId = newStatus === "OPEN" ? currentUserId : null;
 
   const payload = {
@@ -87,10 +86,12 @@ function updateGridUI() {
     const lockerId = item.dataset.lockerId;
     const state = lockerStates[lockerId] || { status: "EMPTY", userId: null };
 
-    // Xóa tất cả trạng thái màu cũ
+    // Reset styles và listeners
     item.classList.remove("status-empty", "status-locked", "status-open");
     item.style.border = "none";
-    item.style.backgroundColor = "transparent"; // Reset nền
+    item.style.backgroundColor = "transparent";
+    item.onmouseenter = null; // <-- Reset listener
+    item.onmouseleave = null; // <-- Reset listener
 
     // Xóa nút Close cũ (nếu có)
     const existingCloseBtn = item.querySelector(".close-btn");
@@ -98,12 +99,11 @@ function updateGridUI() {
 
     // 🚨 Logic Màu và Trạng Thái
     if (state.status === "EMPTY") {
-      // Tủ trống: Không màu, sẵn sàng đăng ký
+      // Tủ trống: Viền xanh (mặc định từ CSS)
       item.classList.add("status-empty");
-      // Giữ viền xanh mặc định (từ CSS)
       item.style.border = ""; // Xóa border inline để CSS áp dụng
     } else if (state.status === "LOCKED") {
-      // Tủ đã đóng: Màu đỏ, đã có người đăng ký
+      // Yêu cầu 4 & 6: Tủ đã đóng/khóa -> Viền màu đỏ
       item.classList.add("status-locked");
       item.style.backgroundColor = "rgba(255, 0, 0, 0.4)";
       item.style.border = "2px solid red";
@@ -111,14 +111,16 @@ function updateGridUI() {
       // Tủ đang mở:
       // Nếu là người dùng đang mở tủ này
       if (state.userId === currentUserId) {
+        // Yêu cầu 2: Tủ đang mở -> Viền màu xanh lá
         item.classList.add("status-open");
         item.style.backgroundColor = "rgba(0, 255, 0, 0.2)";
         item.style.border = "2px solid green";
 
-        // Thêm nút Đóng tủ
+        // Yêu cầu 3: Thêm nút "Close" ẩn
         const closeBtn = document.createElement("button");
         closeBtn.textContent = "CLOSE";
-        closeBtn.className = "close-btn"; // (Bạn cần thêm style cho .close-btn trong CSS)
+        closeBtn.className = "close-btn";
+        // (Thêm style cho nút)
         closeBtn.style.position = "absolute";
         closeBtn.style.bottom = "10px";
         closeBtn.style.left = "50%";
@@ -129,16 +131,33 @@ function updateGridUI() {
         closeBtn.style.color = "black";
         closeBtn.style.border = "none";
         closeBtn.style.borderRadius = "5px";
+        closeBtn.style.cursor = "pointer";
+        // Ẩn nút "Close" mặc định
+        closeBtn.style.visibility = "hidden";
+        closeBtn.style.opacity = "0";
+        closeBtn.style.transition = "opacity 0.2s ease";
+
         closeBtn.onclick = (e) => {
           e.preventDefault();
           e.stopPropagation(); // Ngăn sự kiện click vào tủ
+          // Yêu cầu 4: Đóng tủ (sẽ chuyển sang viền đỏ)
           handleCloseLocker(lockerId);
         };
         item.appendChild(closeBtn);
+
+        // Thêm sự kiện hover cho Tủ (item) để hiện/ẩn nút
+        item.onmouseenter = () => {
+          closeBtn.style.visibility = "visible";
+          closeBtn.style.opacity = "1";
+        };
+        item.onmouseleave = () => {
+          closeBtn.style.visibility = "hidden";
+          closeBtn.style.opacity = "0";
+        };
       } else {
-        // Tủ đang mở bởi người khác: hiện đỏ (bị chiếm)
+        // Tủ đang mở bởi người khác: hiện màu cam (bị chiếm)
         item.classList.add("status-locked");
-        item.style.backgroundColor = "rgba(255, 165, 0, 0.4)"; // Cam (Đang bị chiếm)
+        item.style.backgroundColor = "rgba(255, 165, 0, 0.4)";
         item.style.border = "2px solid orange";
       }
     }
@@ -158,7 +177,7 @@ function handleLockerClick(lockerId) {
   if (state.status === "EMPTY") {
     // Tủ trống: Yêu cầu đăng ký
     if (confirm(`Tủ ${lockerId} đang trống. Bạn muốn đăng ký và mở tủ?`)) {
-      // Lưu số tủ vào sessionStorage và chuyển đến trang chọn phương thức đăng nhập
+      // Lưu số tủ vào sessionStorage và chuyển đến trang chọn phương thức
       sessionStorage.setItem("locker_to_open", lockerId);
       window.location.href = "./face_log.html"; // Chuyển đến trang chọn phương thức ID/Pass
     }
@@ -175,7 +194,7 @@ function handleLockerClick(lockerId) {
       alert(`Tủ ${lockerId} của bạn đang mở.`);
     }
   } else {
-    // Tủ đã có người khác đăng ký/chiếm
+    // Yêu cầu 7: Tủ đã có người khác đăng ký/chiếm
     alert(
       `Tủ ${lockerId} đang ${
         state.status === "OPEN" ? "được sử dụng" : "đã được đăng ký"
@@ -191,14 +210,15 @@ function handleCloseLocker(lockerId) {
   }
 }
 
-// 5. Xử lý đăng xuất (Tự động đóng tủ đang mở)
-// Đổi tên hàm để auth_protect.js có thể gọi
+// 5. Yêu cầu 5: Xử lý đăng xuất (Tự động đóng tủ đang mở)
+// Hàm này được gọi bởi auth_protect.js
 window.handleLogoutAndLock = function () {
   if (currentUserId) {
     const openUserLockers = [];
     Object.keys(lockerStates).forEach((lockerId) => {
       const state = lockerStates[lockerId];
       if (state.status === "OPEN" && state.userId === currentUserId) {
+        // Tự động đóng/khóa tủ
         openUserLockers.push(updateLockerStatus(lockerId, "LOCKED"));
       }
     });
@@ -229,7 +249,7 @@ window.openLockerSuccess = (lockerId) => {
   updateLockerStatus(lockerId, "OPEN").then((success) => {
     if (success) {
       alert(`🔓 Tủ ${lockerId} đã mở thành công!`);
-      // 2. Chuyển hướng về trang Open.html để thấy trạng thái mới
+      // Yêu cầu 1: Chuyển hướng về trang Open.html
       window.location.href = "./open.html";
     } else {
       alert(`❌ Không thể mở tủ ${lockerId}. Vui lòng thử lại.`);
@@ -244,7 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (gridContainer) {
     gridContainer.addEventListener("click", (e) => {
       const item = e.target.closest(".grid-item");
-      // Ngăn click nếu đang bấm nút close
+      // Ngăn click vào tủ nếu đang bấm nút close
       if (item && !e.target.classList.contains("close-btn")) {
         e.preventDefault();
         handleLockerClick(item.dataset.lockerId);
