@@ -182,6 +182,7 @@
 // );
 
 // account.js — Render server (ESM) with lockerCode & RasPi bridge
+// account.js — Render server (ESM) with lockerCode & RasPi bridge
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -192,9 +193,9 @@ dotenv.config();
 const app = express();
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10mb" })); // Tăng giới hạn payload JSON cho ảnh Base64
 
-// ===== MongoDB Atlas Connection =====
+// ===== MongoDB Atlas Connection (EXISTING) =====
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -203,7 +204,7 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB Atlas"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// ===== User Schema =====
+// ===== User Schema (Đã thêm lockerCode) =====
 const accountSchema = new mongoose.Schema(
   {
     name: String,
@@ -211,12 +212,23 @@ const accountSchema = new mongoose.Schema(
     phone: String,
     password: String,
     hint: String,
-    lockerCode: { type: String, default: "" }, // ✅ thêm lockerCode
+    lockerCode: { type: String, default: null }, // ✅ Đã thêm lockerCode
   },
   { collection: "account" }
 );
 
 const Account = mongoose.model("Account", accountSchema);
+
+// Helper function to prepare user object (Sử dụng để đảm bảo user.id luôn có)
+const prepareUser = (acc) => {
+  if (!acc) return null;
+  // Sử dụng .lean() khi fetch từ DB để có thể sửa đổi Object dễ dàng
+  const userObj = acc.toObject ? acc.toObject() : acc;
+  userObj.id = userObj._id.toString();
+  delete userObj._id;
+  if (userObj.lockerCode === undefined) userObj.lockerCode = null;
+  return userObj;
+};
 
 // ===== Register =====
 app.post("/register", async (req, res) => {
@@ -228,39 +240,36 @@ app.post("/register", async (req, res) => {
     const exist = await Account.findOne({ email });
     if (exist) return res.status(400).json({ error: "Email đã tồn tại" });
 
-    const acc = new Account({ name, email, phone, password, hint });
+    const acc = new Account({
+      name,
+      email,
+      phone,
+      password,
+      hint,
+      lockerCode: null,
+    });
     await acc.save();
 
-    const userObj = acc.toObject();
-    userObj.id = acc._id.toString();
-    delete userObj._id;
-
-    res.json({ message: "✅ Đăng ký thành công", user: userObj });
+    res.json({ message: "✅ Đăng ký thành công", user: prepareUser(acc) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// ===== Login =====
+// ===== Login (Sửa để trả về User chuẩn hóa) =====
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const acc = await Account.findOne({ email, password }).lean();
+    const acc = await Account.findOne({ email, password }).lean(); // Dùng .lean()
     if (!acc) return res.status(401).json({ error: "Sai thông tin đăng nhập" });
 
-    // ✅ đảm bảo có lockerCode
-    if (!acc.lockerCode) acc.lockerCode = "";
-
-    acc.id = acc._id.toString();
-    delete acc._id;
-
-    res.json({ message: "✅ Đăng nhập thành công", user: acc });
+    res.json({ message: "✅ Đăng nhập thành công", user: prepareUser(acc) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// ===== Update User (bao gồm lockerCode) =====
+// ===== Update User (Bao gồm lockerCode) =====
 app.post("/update", async (req, res) => {
   try {
     const { id, name, email, phone, password, hint, lockerCode } = req.body;
@@ -269,29 +278,26 @@ app.post("/update", async (req, res) => {
       id,
       { name, email, phone, password, hint, lockerCode },
       { new: true }
-    ).lean();
+    ).lean(); // Dùng .lean()
 
     if (!updated) return res.status(404).json({ error: "User not found" });
 
-    updated.id = updated._id.toString();
-    delete updated._id;
-
-    res.json({ message: "✅ Updated successfully", user: updated });
+    res.json({
+      message: "✅ Updated successfully",
+      user: prepareUser(updated),
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// ===== Lấy lại user theo ID (để reload lockerCode khi đăng nhập lại) =====
+// ===== Lấy lại user theo ID (Để reload user) =====
 app.get("/user/:id", async (req, res) => {
   try {
     const user = await Account.findById(req.params.id).lean();
     if (!user) return res.status(404).json({ error: "User not found" });
 
-    user.id = user._id.toString();
-    delete user._id;
-
-    res.json({ user });
+    res.json({ user: prepareUser(user) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
