@@ -181,7 +181,7 @@
 //   console.log(`🚀 Server running on port ${PORT} (ESM mode)`)
 // );
 
-// account.js — Render server (ESM) with lockerCode & full RasPi bridge
+// account.js — Render server (ESM) with lockerCode & RasPi bridge
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -218,26 +218,6 @@ const accountSchema = new mongoose.Schema(
 
 const Account = mongoose.model("Account", accountSchema);
 
-// ===== Login =====
-app.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const acc = await Account.findOne({ email, password }).lean();
-
-    if (!acc) return res.status(401).json({ error: "Invalid credentials" });
-
-    // ✅ Thêm bảo vệ lockerCode
-    if (!acc.lockerCode) acc.lockerCode = "";
-
-    acc.id = acc._id.toString(); // Cho frontend dễ dùng
-    delete acc._id;
-
-    res.json({ message: "✅ Login successful", user: acc });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 // ===== Register =====
 app.post("/register", async (req, res) => {
   try {
@@ -250,7 +230,31 @@ app.post("/register", async (req, res) => {
 
     const acc = new Account({ name, email, phone, password, hint });
     await acc.save();
-    res.json({ message: "✅ Đăng ký thành công", user: acc });
+
+    const userObj = acc.toObject();
+    userObj.id = acc._id.toString();
+    delete userObj._id;
+
+    res.json({ message: "✅ Đăng ký thành công", user: userObj });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ===== Login =====
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const acc = await Account.findOne({ email, password }).lean();
+    if (!acc) return res.status(401).json({ error: "Sai thông tin đăng nhập" });
+
+    // ✅ đảm bảo có lockerCode
+    if (!acc.lockerCode) acc.lockerCode = "";
+
+    acc.id = acc._id.toString();
+    delete acc._id;
+
+    res.json({ message: "✅ Đăng nhập thành công", user: acc });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -269,20 +273,24 @@ app.post("/update", async (req, res) => {
 
     if (!updated) return res.status(404).json({ error: "User not found" });
 
-    // ✅ Thêm dòng này để trả về id thống nhất
     updated.id = updated._id.toString();
+    delete updated._id;
 
     res.json({ message: "✅ Updated successfully", user: updated });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+// ===== Lấy lại user theo ID (để reload lockerCode khi đăng nhập lại) =====
 app.get("/user/:id", async (req, res) => {
   try {
     const user = await Account.findById(req.params.id).lean();
     if (!user) return res.status(404).json({ error: "User not found" });
+
     user.id = user._id.toString();
     delete user._id;
+
     res.json({ user });
   } catch (err) {
     res.status(500).json({ error: err.message });

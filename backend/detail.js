@@ -99,25 +99,14 @@
 //   //   sessionStorage.removeItem("user");
 //   // });
 // });
-// detail.js — Quản lý thông tin tài khoản & mã khóa tủ
-// detail.js — Quản lý tài khoản & mã khóa tủ (locker code)
+// detail.js — Quản lý tài khoản & mã khóa tủ
 document.addEventListener("DOMContentLoaded", async () => {
-  const localUser = JSON.parse(sessionStorage.getItem("user"));
-  if (!localUser) {
+  const user = JSON.parse(sessionStorage.getItem("user"));
+  if (!user) {
     alert("⚠️ Bạn cần đăng nhập trước.");
     window.location.href = "logon.html";
     return;
   }
-
-  // 🧠 Tải lại user từ server (đảm bảo lockerCode mới nhất)
-  const res = await fetch(
-    `https://smart-locker-kgnx.onrender.com/user/${localUser.id}`
-  );
-  const data = await res.json();
-  const user = data.user || localUser; // nếu server lỗi thì dùng bản cũ
-
-  // 🔁 Cập nhật lại sessionStorage
-  sessionStorage.setItem("user", JSON.stringify(user));
 
   const nameEl = document.getElementById("name");
   const emailEl = document.getElementById("email");
@@ -126,6 +115,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   const hintEl = document.getElementById("hint");
   const lockerCodeEl = document.getElementById("lockerCode");
 
+  const changeBtn = document.getElementById("change-btn");
+  const saveBtn = document.getElementById("save-btn");
+  const logoutBtn = document.getElementById("logout-btn");
+  const backBtn = document.getElementById("back-btn");
+
+  // 🧠 Luôn lấy lại user mới nhất từ server (tránh lỗi lockerCode không hiển thị)
+  try {
+    const res = await fetch(
+      `https://smart-locker-kgnx.onrender.com/user/${user.id}`
+    );
+    const data = await res.json();
+    if (res.ok && data.user) {
+      sessionStorage.setItem("user", JSON.stringify(data.user));
+      Object.assign(user, data.user);
+    }
+  } catch (err) {
+    console.warn("Không thể load lại thông tin user:", err.message);
+  }
+
+  // Hiển thị thông tin
   nameEl.textContent = user.name || "";
   emailEl.textContent = user.email || "";
   phoneEl.textContent = user.phone || "";
@@ -134,21 +143,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (lockerCodeEl)
     lockerCodeEl.textContent = user.lockerCode || "Chưa thiết lập";
 
-  // ✏️ Cho phép chỉnh sửa
+  // Cho phép chỉnh sửa
   changeBtn.addEventListener("click", () => {
     [nameEl, emailEl, phoneEl, passwordEl, hintEl, lockerCodeEl].forEach(
       (el) => {
         if (el) {
           el.contentEditable = true;
           el.style.borderBottom = "2px solid #0063ff";
-          el.style.outline = "none";
         }
       }
     );
     saveBtn.style.display = "inline-block";
   });
 
-  // 💾 Lưu lại dữ liệu (bao gồm lockerCode)
+  // Lưu lại
   saveBtn.addEventListener("click", async () => {
     const newData = {
       name: nameEl.textContent.trim(),
@@ -161,27 +169,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         : user.lockerCode,
     };
 
-    const userId = user._id || user.id;
-    if (!userId) {
-      alert("❌ Thiếu ID người dùng!");
-      return;
-    }
-
     try {
       const res = await fetch("https://smart-locker-kgnx.onrender.com/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: userId, ...newData }),
+        body: JSON.stringify({ id: user.id, ...newData }),
       });
 
       const data = await res.json();
       if (res.ok && data.user) {
         alert("✅ Cập nhật thành công!");
-
-        // 🧠 Cập nhật lại sessionStorage để giữ lockerCode
         sessionStorage.setItem("user", JSON.stringify(data.user));
-
-        // 🔒 Khóa lại ô nhập
         [nameEl, emailEl, phoneEl, passwordEl, hintEl, lockerCodeEl].forEach(
           (el) => {
             if (el) {
@@ -199,10 +197,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // 🔙 Quay lại menu
   backBtn.addEventListener("click", () => (window.location.href = "menu.html"));
-
-  // 🚪 Đăng xuất
   logoutBtn.addEventListener("click", () => {
     sessionStorage.removeItem("user");
     alert("🔓 Bạn đã đăng xuất!");
