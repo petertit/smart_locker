@@ -103,7 +103,7 @@ function updateGridUI() {
       item.classList.add("status-empty");
       item.style.border = ""; // Xóa border inline để CSS áp dụng
     } else if (state.status === "LOCKED") {
-      // Yêu cầu 4 & 6: Tủ đã đóng/khóa -> Viền màu đỏ
+      // Tủ đã đóng/khóa -> Viền màu đỏ
       item.classList.add("status-locked");
       item.style.backgroundColor = "rgba(255, 0, 0, 0.4)";
       item.style.border = "2px solid red";
@@ -111,12 +111,12 @@ function updateGridUI() {
       // Tủ đang mở:
       // Nếu là người dùng đang mở tủ này
       if (state.userId === currentUserId) {
-        // Yêu cầu 2: Tủ đang mở -> Viền màu xanh lá
+        // Tủ đang mở -> Viền màu xanh lá
         item.classList.add("status-open");
         item.style.backgroundColor = "rgba(0, 255, 0, 0.2)";
         item.style.border = "2px solid green";
 
-        // Yêu cầu 3: Thêm nút "Close" ẩn
+        // Thêm nút "Close" ẩn
         const closeBtn = document.createElement("button");
         closeBtn.textContent = "CLOSE";
         closeBtn.className = "close-btn";
@@ -140,7 +140,7 @@ function updateGridUI() {
         closeBtn.onclick = (e) => {
           e.preventDefault();
           e.stopPropagation(); // Ngăn sự kiện click vào tủ
-          // Yêu cầu 4: Đóng tủ (sẽ chuyển sang viền đỏ)
+          // Đóng tủ (sẽ chuyển sang viền đỏ)
           handleCloseLocker(lockerId);
         };
         item.appendChild(closeBtn);
@@ -194,7 +194,7 @@ function handleLockerClick(lockerId) {
       alert(`Tủ ${lockerId} của bạn đang mở.`);
     }
   } else {
-    // Yêu cầu 7: Tủ đã có người khác đăng ký/chiếm
+    // Tủ đã có người khác đăng ký/chiếm
     alert(
       `Tủ ${lockerId} đang ${
         state.status === "OPEN" ? "được sử dụng" : "đã được đăng ký"
@@ -210,7 +210,7 @@ function handleCloseLocker(lockerId) {
   }
 }
 
-// 5. Yêu cầu 5: Xử lý đăng xuất (Tự động đóng tủ đang mở)
+// 5. Xử lý đăng xuất (Tự động đóng tủ đang mở)
 // Hàm này được gọi bởi auth_protect.js
 window.handleLogoutAndLock = function () {
   if (currentUserId) {
@@ -244,17 +244,42 @@ window.handleLogoutAndLock = function () {
 };
 
 // 6. Xử lý mở tủ thành công (Callback từ pass_lock_login.js / scan.js)
+// ✅ ✅ ✅ SỬA LỖI: Thêm lệnh mở khóa vật lý tại đây ✅ ✅ ✅
 window.openLockerSuccess = (lockerId) => {
-  // 1. Cập nhật trạng thái tủ trên server thành 'OPEN'
-  updateLockerStatus(lockerId, "OPEN").then((success) => {
-    if (success) {
-      alert(`🔓 Tủ ${lockerId} đã mở thành công!`);
-      // Yêu cầu 1: Chuyển hướng về trang Open.html
-      window.location.href = "./open.html";
-    } else {
-      alert(`❌ Không thể mở tủ ${lockerId}. Vui lòng thử lại.`);
-    }
-  });
+  if (!lockerId) {
+    alert("Lỗi: Không tìm thấy lockerId để mở.");
+    return;
+  }
+
+  // 1. Gửi lệnh MỞ KHÓA VẬT LÝ đến RasPi
+  fetch(`${RENDER_BRIDGE}/raspi/unlock`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    // Gửi ID tủ khóa (hoặc email người dùng, tùy theo backend RasPi của bạn)
+    body: JSON.stringify({ lockerId: lockerId, user: currentUser?.email }),
+  })
+    .then((res) => res.json())
+    .then((unlockData) => {
+      if (!unlockData.success) {
+        alert("⚠️ Không thể gửi lệnh mở khóa đến Pi. Nhưng vẫn cập nhật DB.");
+      }
+
+      // 2. Cập nhật trạng thái tủ trên server thành 'OPEN'
+      return updateLockerStatus(lockerId, "OPEN");
+    })
+    .then((success) => {
+      if (success) {
+        alert(`🔓 Tủ ${lockerId} đã mở thành công!`);
+        // 3. Chuyển hướng về trang Open.html
+        window.location.href = "./open.html";
+      } else {
+        alert(`❌ Không thể cập nhật trạng thái tủ ${lockerId}.`);
+      }
+    })
+    .catch((err) => {
+      console.error("Lỗi khi mở khóa:", err);
+      alert("❌ Lỗi nghiêm trọng khi gửi lệnh mở khóa: " + err.message);
+    });
 };
 
 // 7. Khởi chạy

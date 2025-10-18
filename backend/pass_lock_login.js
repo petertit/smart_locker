@@ -11,6 +11,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("lockerCode");
   const row3 = document.getElementById("row3");
 
+  // Lấy lockerId mà người dùng đã chọn ở trang open.html
+  const lockerId = sessionStorage.getItem("locker_to_open");
+  if (!lockerId) {
+    alert("Lỗi: Không tìm thấy tủ nào đang chờ mở. Đang quay lại...");
+    window.location.href = "open.html";
+    return;
+  }
+
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const entered = input.value.trim();
@@ -20,20 +28,16 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // So sánh mã đã nhập với mã của người dùng
     if (entered === user.lockerCode) {
-      row3.textContent = "✅ Mã chính xác — tủ đang mở...";
+      row3.textContent = "✅ Mã chính xác — Đang gửi lệnh mở tủ...";
       row3.style.color = "#00ff66";
-      alert("✅ Mở tủ thành công!");
 
-      // 👉 Gửi tín hiệu mở khóa về Raspberry Pi (nếu có endpoint)
-      try {
-        await fetch("https://smart-locker-kgnx.onrender.com/raspi/unlock", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user: user.email }),
-        });
-      } catch (err) {
-        console.warn("⚠️ Không thể gửi lệnh mở khóa:", err.message);
+      // ✅ SỬA LỖI: Gọi hàm thành công chung (Hàm này sẽ xử lý mở Pi và chuyển hướng)
+      if (window.openLockerSuccess) {
+        window.openLockerSuccess(lockerId);
+      } else {
+        alert("Lỗi: Không tìm thấy hàm openLockerSuccess. Không thể mở tủ.");
       }
     } else {
       row3.textContent = "❌ Mã khóa không đúng!";
