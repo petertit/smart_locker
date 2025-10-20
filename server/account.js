@@ -181,7 +181,7 @@
 //   console.log(`🚀 Server running on port ${PORT} (ESM mode)`)
 // );
 
-// account.js — Render server (ESM) with detailed logging for /raspi/unlock
+// account.js — Render server (ESM) with revised OPENED history logging
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -221,7 +221,7 @@ const Account = mongoose.model("Account", accountSchema);
 // ===== History Schema (EXISTING) =====
 const historySchema = new mongoose.Schema(
   {
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "Account" }, // Sử dụng ObjectId
     lockerId: { type: String, default: null },
     action: { type: String, enum: ["REGISTERED", "OPENED", "LOCKED"] },
     timestamp: { type: Date, default: Date.now },
@@ -241,26 +241,21 @@ const prepareUser = (acc) => {
   return userObj;
 };
 
-// ===== Register (✅ ĐÃ CẬP NHẬT: Thêm ghi log + CHUẨN HÓA EMAIL) =====
+// ===== Register (EXISTING - Email Lowercase) =====
 app.post("/register", async (req, res) => {
   try {
-    // Lấy email và chuyển sang chữ thường NGAY LẬP TỨC
     const { name, phone, password, hint } = req.body;
-    const email = req.body.email ? req.body.email.toLowerCase() : null; // <-- SỬA DÒNG NÀY
+    const email = req.body.email ? req.body.email.toLowerCase() : null;
 
-    // Kiểm tra các trường cần thiết (bao gồm email sau khi chuyển đổi)
     if (!name || !email || !phone || !password)
-      // <-- SỬA DÒNG NÀY (dùng email đã chuẩn hóa)
       return res.status(400).json({ error: "Thiếu thông tin cần thiết" });
 
-    // Tìm email đã chuẩn hóa
-    const exist = await Account.findOne({ email }); // <-- SỬA DÒNG NÀY
+    const exist = await Account.findOne({ email });
     if (exist) return res.status(400).json({ error: "Email đã tồn tại" });
 
-    // Lưu email đã chuẩn hóa
     const acc = new Account({
       name,
-      email, // <-- SỬA DÒNG NÀY (lưu email chữ thường)
+      email,
       phone,
       password,
       hint,
@@ -269,7 +264,6 @@ app.post("/register", async (req, res) => {
     });
     await acc.save();
 
-    // GHI LOG: Ghi lại sự kiện đăng ký
     const newHistoryEvent = new History({
       userId: acc._id,
       action: "REGISTERED",
@@ -282,15 +276,13 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// ===== Login (✅ ĐÃ CẬP NHẬT: CHUẨN HÓA EMAIL) =====
+// ===== Login (EXISTING - Email Lowercase) =====
 app.post("/login", async (req, res) => {
   try {
-    // Lấy email và chuyển sang chữ thường NGAY LẬP TỨC
     const { password } = req.body;
-    const email = req.body.email ? req.body.email.toLowerCase() : null; // <-- SỬA DÒNG NÀY
+    const email = req.body.email ? req.body.email.toLowerCase() : null;
 
-    // Tìm bằng email đã chuẩn hóa
-    const acc = await Account.findOne({ email, password }).lean(); // <-- SỬA DÒNG NÀY
+    const acc = await Account.findOne({ email, password }).lean();
     if (!acc) return res.status(401).json({ error: "Sai thông tin đăng nhập" });
 
     res.json({ message: "✅ Đăng nhập thành công", user: prepareUser(acc) });
@@ -299,7 +291,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// ===== Update User (EXISTING) =====
+// ===== Update User (EXISTING - Dynamic Fields) =====
 app.post("/update", async (req, res) => {
   try {
     const {
@@ -315,7 +307,8 @@ app.post("/update", async (req, res) => {
 
     const fieldsToUpdate = {};
     if (name !== undefined) fieldsToUpdate.name = name;
-    if (email !== undefined) fieldsToUpdate.email = email;
+    // Chuẩn hóa email khi cập nhật
+    if (email !== undefined) fieldsToUpdate.email = email.toLowerCase();
     if (phone !== undefined) fieldsToUpdate.phone = phone;
     if (password !== undefined) fieldsToUpdate.password = password;
     if (hint !== undefined) fieldsToUpdate.hint = hint;
@@ -343,11 +336,17 @@ app.post("/update", async (req, res) => {
 // ===== Lấy lại user theo ID (EXISTING) =====
 app.get("/user/:id", async (req, res) => {
   try {
-    const user = await Account.findById(req.params.id).lean();
+    // Sửa: Chuyển đổi string ID thành ObjectId trước khi tìm
+    const userIdObject = new mongoose.Types.ObjectId(req.params.id);
+    const user = await Account.findById(userIdObject).lean();
     if (!user) return res.status(404).json({ error: "User not found" });
 
     res.json({ user: prepareUser(user) });
   } catch (err) {
+    // Bắt lỗi nếu ID không hợp lệ
+    if (err instanceof mongoose.Error.CastError) {
+      return res.status(400).json({ error: "Invalid user ID format" });
+    }
     res.status(500).json({ error: err.message });
   }
 });
@@ -361,7 +360,12 @@ const lockerStateSchema = new mongoose.Schema(
       enum: ["EMPTY", "LOCKED", "OPEN"],
       default: "EMPTY",
     },
-    ownerId: { type: String, default: null },
+    // Sửa: Lưu ownerId dưới dạng ObjectId để nhất quán
+    ownerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Account",
+      default: null,
+    },
     timestamp: { type: Date, default: Date.now },
   },
   { collection: "locker_states" }
@@ -370,7 +374,6 @@ const LockerState = mongoose.model("LockerState", lockerStateSchema);
 
 // Endpoint 1: Lấy trạng thái tất cả tủ (EXISTING)
 app.get("/lockers/status", async (req, res) => {
-  // ... (code không đổi) ...
   try {
     const allLockers = await LockerState.find().lean();
     for (let i = 1; i <= 9; i++) {
@@ -387,30 +390,39 @@ app.get("/lockers/status", async (req, res) => {
     const finalLockers = await LockerState.find().lean();
     res.json({
       success: true,
+      // Sửa: Chuyển đổi ownerId ObjectId thành string trước khi gửi về client
       lockers: finalLockers.map((l) => ({
         lockerId: l.lockerId,
         status: l.status,
-        ownerId: l.ownerId,
+        ownerId: l.ownerId ? l.ownerId.toString() : null, // <-- SỬA DÒNG NÀY
       })),
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: "Lỗi khi tải trạng thái tủ: " + err.message,
-    });
+    res
+      .status(500)
+      .json({
+        success: false,
+        error: "Lỗi khi tải trạng thái tủ: " + err.message,
+      });
   }
 });
 
 // Endpoint 2: Cập nhật trạng thái tủ (EXISTING - Ghi log "LOCKED")
 app.post("/lockers/update", async (req, res) => {
   try {
-    const { lockerId, status, ownerId } = req.body;
+    const { lockerId, status } = req.body;
+    // Sửa: Nhận ownerId dạng string từ client và chuyển thành ObjectId (hoặc null)
+    const ownerId = req.body.ownerId
+      ? new mongoose.Types.ObjectId(req.body.ownerId)
+      : null;
 
+    // Ghi log "LOCKED" (Giữ nguyên logic dùng ownerId hiện tại)
     if (status === "LOCKED") {
       const currentState = await LockerState.findOne({ lockerId }).lean();
+      // currentState.ownerId bây giờ là ObjectId
       if (currentState && currentState.ownerId) {
         const newHistoryEvent = new History({
-          userId: currentState.ownerId,
+          userId: currentState.ownerId, // Dùng trực tiếp ObjectId
           lockerId: lockerId,
           action: "LOCKED",
         });
@@ -418,9 +430,10 @@ app.post("/lockers/update", async (req, res) => {
       }
     }
 
+    // Cập nhật trạng thái, dùng ownerId đã chuyển đổi
     const updatedLocker = await LockerState.findOneAndUpdate(
       { lockerId },
-      { status, ownerId: ownerId || null, timestamp: new Date() },
+      { status, ownerId: ownerId, timestamp: new Date() },
       { new: true }
     ).lean();
 
@@ -431,17 +444,26 @@ app.post("/lockers/update", async (req, res) => {
     }
     res.json({
       success: true,
+      // Sửa: Chuyển đổi ownerId ObjectId thành string trước khi gửi về client
       locker: {
         lockerId: updatedLocker.lockerId,
         status: updatedLocker.status,
-        ownerId: updatedLocker.ownerId,
+        ownerId: updatedLocker.ownerId
+          ? updatedLocker.ownerId.toString()
+          : null, // <-- SỬA DÒNG NÀY
       },
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      error: "Lỗi khi cập nhật trạng thái tủ: " + err.message,
-    });
+    // Bắt lỗi nếu ownerId không hợp lệ
+    if (err instanceof mongoose.Error.CastError) {
+      return res.status(400).json({ error: "Invalid owner ID format" });
+    }
+    res
+      .status(500)
+      .json({
+        success: false,
+        error: "Lỗi khi cập nhật trạng thái tủ: " + err.message,
+      });
   }
 });
 
@@ -546,47 +568,59 @@ app.post("/raspi/recognize-remote", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// ENDPOINT /raspi/unlock (✅ ĐÃ CẬP NHẬT: CHUẨN HÓA EMAIL + LOG DEBUG)
+// ✅ ===== ENDPOINT /raspi/unlock (ĐÃ SỬA LOGIC GHI LOG "OPENED") =====
 app.post("/raspi/unlock", async (req, res) => {
   console.log("--- Received request at /raspi/unlock ---");
   console.log("Request body:", req.body);
 
   try {
-    // Lấy email và chuyển sang chữ thường NGAY LẬP TỨC
-    const { lockerId } = req.body;
-    const userEmail = req.body.user ? req.body.user.toLowerCase() : null; // <-- SỬA DÒNG NÀY
+    const { lockerId, user: userEmail } = req.body; // userEmail vẫn là email dạng string
 
-    console.log(
-      `Attempting to log OPENED event for locker ${lockerId}, user email ${userEmail}`
-    );
-
+    // Sửa: Lấy ownerId từ client gửi lên (phải là string ID chuẩn)
+    // Client (open.js) trong hàm openLockerSuccess -> updateUserField gửi id dạng string
+    // Tuy nhiên, để đảm bảo, chúng ta sẽ tìm user bằng email trước
+    let userIdToLog = null;
     if (userEmail) {
-      console.log("Finding user by lowercase email..."); // Cập nhật log
-      // Tìm bằng email đã chuẩn hóa
-      const user = await Account.findOne({ email: userEmail }).lean(); // <-- SỬA DÒNG NÀY
-
+      const user = await Account.findOne({
+        email: userEmail.toLowerCase(),
+      }).lean();
       if (user) {
-        console.log("User found:", user._id);
-        const newHistoryEvent = new History({
-          userId: user._id,
-          lockerId: lockerId,
-          action: "OPENED",
-        });
-        console.log("Attempting to save history event:", newHistoryEvent);
-        await newHistoryEvent.save();
-        console.log("✅ History event saved successfully!");
+        userIdToLog = user._id; // Lấy ObjectId
       } else {
         console.error(
-          `❌ History log failed: User not found for email ${userEmail}`
+          `History log failed: User not found for email ${userEmail}`
         );
       }
     } else {
-      console.error(
-        "❌ History log failed: User email not provided in request body"
-      );
+      console.error("History log failed: User email not provided");
     }
 
-    // Chuyển tiếp (forward) request đến RASPI_URL
+    console.log(
+      `Attempting to log OPENED event for locker ${lockerId}, user ObjectId ${userIdToLog}`
+    );
+
+    // GHI LOG "OPENED" nếu tìm thấy user ID
+    if (userIdToLog) {
+      try {
+        const newHistoryEvent = new History({
+          userId: userIdToLog, // Dùng ObjectId đã tìm được
+          lockerId: lockerId,
+          action: "OPENED",
+        });
+        console.log(
+          "Attempting to save OPENED history event:",
+          newHistoryEvent
+        );
+        await newHistoryEvent.save();
+        console.log("✅ OPENED History event saved successfully!");
+      } catch (saveError) {
+        console.error("❌ Error saving OPENED history event:", saveError);
+      }
+    } else {
+      console.error("❌ Skipping OPENED history log due to missing user ID.");
+    }
+
+    // Chuyển tiếp (forward) request đến RASPI_URL (Giữ nguyên)
     console.log("Forwarding unlock request to Pi:", RASPI_URL);
     const r = await fetch(`${RASPI_URL}/unlock`, {
       method: "POST",
@@ -604,15 +638,24 @@ app.post("/raspi/unlock", async (req, res) => {
   }
 });
 
-// ===== ENDPOINT LẤY LỊCH SỬ (EXISTING) =====
+// ===== ENDPOINT LẤY LỊCH SỬ (✅ ĐÃ SỬA: CHUYỂN ID THÀNH OBJECTID) =====
 app.get("/history/:userId", async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const history = await History.find({ userId: userId }).sort({
+    // Chuyển đổi userId string từ params thành ObjectId
+    const userIdObject = new mongoose.Types.ObjectId(req.params.userId);
+
+    // Tìm bằng ObjectId
+    const history = await History.find({ userId: userIdObject }).sort({
       timestamp: -1,
     });
     res.json({ success: true, history: history });
   } catch (err) {
+    // Bắt lỗi nếu ID không hợp lệ
+    if (err instanceof mongoose.Error.CastError) {
+      return res
+        .status(400)
+        .json({ error: "Invalid user ID format for history lookup" });
+    }
     res.status(500).json({ success: false, error: err.message });
   }
 });
