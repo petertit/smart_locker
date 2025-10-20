@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Rubik+Mono+One&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
+      rel="stylesheet"
+    />
+    <title>Locker History - F-LOCK</title>
+    <link rel="stylesheet" href="style/main_header.css" />
+    <link rel="stylesheet" href="style/main_footer.css" />
+    <link rel="stylesheet" href="style/logon.css" />
+    <style>
+      .history-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 15px;
+        margin-bottom: 8px;
+        background-color: #1a1a1a;
+        border-radius: 8px;
+        font-size: 15px;
+      }
+      .history-list-span-action {
+        font-weight: 600;
+      }
+      .history-list-span-date {
+        color: #aaa;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="o">
+      <div class="menu">
+        <h2>F-LOCK</h2>
+        <a href="./menu.html">
+          <img
+            src="./design/SOURCE_IMAGE/Menu.png"
+            alt="menu"
+            class="icon_menu"
+          />
+        </a>
+      </div>
+      <hr />
+    </section>
+    <div class="header">
+      <p id="row1">LOCKER HISTORY</p>
+      <h1 id="historyLockerName">Locker [Loading...]</h1>
+      <p id="row3">Timeline of actions since account creation.</p>
+    </div>
+
+    <div class="register-container login-container" style="max-width: 900px">
+      <div class="right-side" style="padding: 20px">
+        <ul
+          id="historyList"
+          class="history-list"
+          style="
+            list-style: none;
+            padding: 0;
+            max-height: 400px;
+            overflow-y: auto;
+          "
+        >
+          <li style="text-align: center; color: #aaa">Loading history...</li>
+        </ul>
+
+        <button
+          id="back-to-detail-btn"
+          class="btn"
+          style="margin: 20px auto 0; display: block"
+        >
+          Back to Detail
+        </button>
+      </div>
+    </div>
+    <script src="./backend/auth_protect.js"></script>
+    <script src="./backend/history.js"></script>
+  </body>
+
+  <footer class="footer"></footer>
+</html>

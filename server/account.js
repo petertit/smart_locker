@@ -203,7 +203,7 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB Atlas"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// ===== User Schema (Đã thêm lockerCode) =====
+// ===== User Schema (EXISTING) =====
 const accountSchema = new mongoose.Schema(
   {
     name: String,
@@ -215,21 +215,32 @@ const accountSchema = new mongoose.Schema(
   },
   { collection: "account" }
 );
-
 const Account = mongoose.model("Account", accountSchema);
 
-// Helper function to prepare user object (Sử dụng để đảm bảo user.id luôn có)
+// ✅ ===== SCHEMA MỚI: History =====
+const historySchema = new mongoose.Schema(
+  {
+    // Liên kết với user qua ID
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
+    lockerId: { type: String, default: null },
+    action: { type: String, enum: ["REGISTERED", "OPENED", "LOCKED"] },
+    timestamp: { type: Date, default: Date.now },
+  },
+  { collection: "history" }
+);
+const History = mongoose.model("History", historySchema);
+
+// Helper function (EXISTING)
 const prepareUser = (acc) => {
   if (!acc) return null;
-  // Sử dụng .lean() khi fetch từ DB để có thể sửa đổi Object dễ dàng
   const userObj = acc.toObject ? acc.toObject() : acc;
-  userObj.id = userObj._id.toString(); // ✅ Đảm bảo trường ID chuẩn hóa
+  userObj.id = userObj._id.toString();
   delete userObj._id;
   if (userObj.lockerCode === undefined) userObj.lockerCode = null;
   return userObj;
 };
 
-// ===== Register =====
+// ===== Register (✅ ĐÃ CẬP NHẬT: Thêm ghi log) =====
 app.post("/register", async (req, res) => {
   try {
     const { name, email, phone, password, hint } = req.body;
@@ -249,12 +260,18 @@ app.post("/register", async (req, res) => {
     });
     await acc.save();
 
+    // ✅ GHI LOG: Ghi lại sự kiện đăng ký
+    const newHistoryEvent = new History({
+      userId: acc._id,
+      action: "REGISTERED",
+    });
+    await newHistoryEvent.save();
+
     res.json({ message: "✅ Đăng ký thành công", user: prepareUser(acc) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
 // ===== Login (Sửa để trả về User chuẩn hóa) =====
 app.post("/login", async (req, res) => {
   try {
@@ -302,7 +319,7 @@ app.get("/user/:id", async (req, res) => {
   }
 });
 
-// ===== Locker State Schema and Endpoints (from previous step) =====
+// ===== Locker State Schema and Endpoints (EXISTING) =====
 const lockerStateSchema = new mongoose.Schema(
   {
     lockerId: { type: String, required: true, unique: true },
@@ -353,11 +370,27 @@ app.get("/lockers/status", async (req, res) => {
   }
 });
 
-// Endpoint 2: Cập nhật trạng thái tủ
+// Endpoint 2: Cập nhật trạng thái tủ (✅ ĐÃ CẬP NHẬT: Thêm ghi log "LOCKED")
 app.post("/lockers/update", async (req, res) => {
   try {
     const { lockerId, status, ownerId } = req.body;
 
+    // ✅ GHI LOG: Nếu hành động là 'LOCKED'
+    if (status === "LOCKED") {
+      // Tìm xem tủ này trước đó thuộc về ai
+      const currentState = await LockerState.findOne({ lockerId }).lean();
+      if (currentState && currentState.ownerId) {
+        // Ghi lại sự kiện ĐÓNG cho người chủ cũ
+        const newHistoryEvent = new History({
+          userId: currentState.ownerId, // Dùng ownerId cũ
+          lockerId: lockerId,
+          action: "LOCKED",
+        });
+        await newHistoryEvent.save();
+      }
+    }
+
+    // Tiếp tục cập nhật trạng thái
     const updatedLocker = await LockerState.findOneAndUpdate(
       { lockerId },
       { status, ownerId: ownerId || null, timestamp: new Date() },
@@ -485,6 +518,52 @@ app.post("/raspi/recognize-remote", async (req, res) => {
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+// ENDPOINT /raspi/unlock (✅ ĐÃ CẬP NHẬT: Thêm ghi log "OPENED")
+app.post("/raspi/unlock", async (req, res) => {
+  try {
+    const { lockerId, user: userEmail } = req.body; // 'user' là email
+
+    // ✅ GHI LOG: Ghi lại sự kiện MỞ
+    if (userEmail) {
+      // Tìm ID của user dựa trên email
+      const user = await Account.findOne({ email: userEmail }).lean();
+      if (user) {
+        const newHistoryEvent = new History({
+          userId: user._id, // Dùng _id (ObjectId)
+          lockerId: lockerId,
+          action: "OPENED",
+        });
+        await newHistoryEvent.save();
+      }
+    }
+
+    // Chuyển tiếp (forward) request đến RASPI_URL
+    const r = await fetch(`${RASPI_URL}/unlock`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req.body), // Gửi thông tin (lockerId, user)
+    });
+    const data = await r.json();
+    res.json(data); // Gửi phản hồi từ Pi về lại cho client
+  } catch (err) {
+    // Nếu Pi bị lỗi hoặc offline, vẫn trả về JSON
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ✅ ===== ENDPOINT MỚI: Lấy lịch sử =====
+app.get("/history/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    // Tìm tất cả lịch sử của user này, sắp xếp mới nhất lên đầu
+    const history = await History.find({ userId: userId }).sort({
+      timestamp: -1,
+    });
+    res.json({ success: true, history: history });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
