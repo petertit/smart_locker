@@ -241,19 +241,26 @@ const prepareUser = (acc) => {
   return userObj;
 };
 
-// ===== Register (EXISTING) =====
+// ===== Register (✅ ĐÃ CẬP NHẬT: Thêm ghi log + CHUẨN HÓA EMAIL) =====
 app.post("/register", async (req, res) => {
   try {
-    const { name, email, phone, password, hint } = req.body;
+    // Lấy email và chuyển sang chữ thường NGAY LẬP TỨC
+    const { name, phone, password, hint } = req.body;
+    const email = req.body.email ? req.body.email.toLowerCase() : null; // <-- SỬA DÒNG NÀY
+
+    // Kiểm tra các trường cần thiết (bao gồm email sau khi chuyển đổi)
     if (!name || !email || !phone || !password)
+      // <-- SỬA DÒNG NÀY (dùng email đã chuẩn hóa)
       return res.status(400).json({ error: "Thiếu thông tin cần thiết" });
 
-    const exist = await Account.findOne({ email });
+    // Tìm email đã chuẩn hóa
+    const exist = await Account.findOne({ email }); // <-- SỬA DÒNG NÀY
     if (exist) return res.status(400).json({ error: "Email đã tồn tại" });
 
+    // Lưu email đã chuẩn hóa
     const acc = new Account({
       name,
-      email,
+      email, // <-- SỬA DÒNG NÀY (lưu email chữ thường)
       phone,
       password,
       hint,
@@ -262,6 +269,7 @@ app.post("/register", async (req, res) => {
     });
     await acc.save();
 
+    // GHI LOG: Ghi lại sự kiện đăng ký
     const newHistoryEvent = new History({
       userId: acc._id,
       action: "REGISTERED",
@@ -274,11 +282,15 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// ===== Login (EXISTING) =====
+// ===== Login (✅ ĐÃ CẬP NHẬT: CHUẨN HÓA EMAIL) =====
 app.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const acc = await Account.findOne({ email, password }).lean();
+    // Lấy email và chuyển sang chữ thường NGAY LẬP TỨC
+    const { password } = req.body;
+    const email = req.body.email ? req.body.email.toLowerCase() : null; // <-- SỬA DÒNG NÀY
+
+    // Tìm bằng email đã chuẩn hóa
+    const acc = await Account.findOne({ email, password }).lean(); // <-- SỬA DÒNG NÀY
     if (!acc) return res.status(401).json({ error: "Sai thông tin đăng nhập" });
 
     res.json({ message: "✅ Đăng nhập thành công", user: prepareUser(acc) });
@@ -534,33 +546,35 @@ app.post("/raspi/recognize-remote", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// ✅ ===== ENDPOINT /raspi/unlock (ĐÃ THÊM LOG DEBUG) =====
+// ENDPOINT /raspi/unlock (✅ ĐÃ CẬP NHẬT: CHUẨN HÓA EMAIL + LOG DEBUG)
 app.post("/raspi/unlock", async (req, res) => {
-  console.log("--- Received request at /raspi/unlock ---"); // Log khi nhận request
-  console.log("Request body:", req.body); // Log nội dung request
+  console.log("--- Received request at /raspi/unlock ---");
+  console.log("Request body:", req.body);
 
   try {
-    const { lockerId, user: userEmail } = req.body;
+    // Lấy email và chuyển sang chữ thường NGAY LẬP TỨC
+    const { lockerId } = req.body;
+    const userEmail = req.body.user ? req.body.user.toLowerCase() : null; // <-- SỬA DÒNG NÀY
 
-    // Log thông tin nhận được
     console.log(
       `Attempting to log OPENED event for locker ${lockerId}, user email ${userEmail}`
     );
 
     if (userEmail) {
-      console.log("Finding user by email...");
-      const user = await Account.findOne({ email: userEmail }).lean();
+      console.log("Finding user by lowercase email..."); // Cập nhật log
+      // Tìm bằng email đã chuẩn hóa
+      const user = await Account.findOne({ email: userEmail }).lean(); // <-- SỬA DÒNG NÀY
 
       if (user) {
-        console.log("User found:", user._id); // Log ID của user
+        console.log("User found:", user._id);
         const newHistoryEvent = new History({
-          userId: user._id, // Dùng _id (ObjectId)
+          userId: user._id,
           lockerId: lockerId,
           action: "OPENED",
         });
         console.log("Attempting to save history event:", newHistoryEvent);
-        await newHistoryEvent.save(); // Lưu vào collection 'history'
-        console.log("✅ History event saved successfully!"); // Log khi lưu thành công
+        await newHistoryEvent.save();
+        console.log("✅ History event saved successfully!");
       } else {
         console.error(
           `❌ History log failed: User not found for email ${userEmail}`
@@ -580,14 +594,13 @@ app.post("/raspi/unlock", async (req, res) => {
       body: JSON.stringify(req.body),
     });
     const data = await r.json();
-    console.log("Response from Pi:", data); // Log phản hồi từ Pi
-    res.json(data); // Gửi phản hồi từ Pi về lại cho client
+    console.log("Response from Pi:", data);
+    res.json(data);
   } catch (err) {
-    // Log lỗi chi tiết
     console.error("❌ Error in /raspi/unlock endpoint:", err);
     res.status(500).json({ success: false, error: err.message });
   } finally {
-    console.log("--- Finished processing /raspi/unlock ---"); // Log khi kết thúc
+    console.log("--- Finished processing /raspi/unlock ---");
   }
 });
 
