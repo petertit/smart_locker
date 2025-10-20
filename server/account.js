@@ -181,7 +181,7 @@
 //   console.log(`🚀 Server running on port ${PORT} (ESM mode)`)
 // );
 
-// account.js — Render server (ESM) with lockerCode & RasPi bridge
+// account.js — Render server (ESM) with detailed logging for /raspi/unlock
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -192,7 +192,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors());
-app.use(express.json({ limit: "10mb" })); // Tăng giới hạn payload JSON cho ảnh Base64
+app.use(express.json({ limit: "10mb" }));
 
 // ===== MongoDB Atlas Connection (EXISTING) =====
 mongoose
@@ -203,7 +203,7 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB Atlas"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// ===== User Schema (✅ ĐÃ CẬP NHẬT) =====
+// ===== User Schema (EXISTING) =====
 const accountSchema = new mongoose.Schema(
   {
     name: String,
@@ -212,16 +212,15 @@ const accountSchema = new mongoose.Schema(
     password: String,
     hint: String,
     lockerCode: { type: String, default: null },
-    registeredLocker: { type: String, default: null }, // ✅ THÊM DÒNG NÀY
+    registeredLocker: { type: String, default: null },
   },
   { collection: "account" }
 );
 const Account = mongoose.model("Account", accountSchema);
 
-// ✅ ===== SCHEMA MỚI: History =====
+// ===== History Schema (EXISTING) =====
 const historySchema = new mongoose.Schema(
   {
-    // Liên kết với user qua ID
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
     lockerId: { type: String, default: null },
     action: { type: String, enum: ["REGISTERED", "OPENED", "LOCKED"] },
@@ -231,18 +230,18 @@ const historySchema = new mongoose.Schema(
 );
 const History = mongoose.model("History", historySchema);
 
-// Helper function (✅ ĐÃ CẬP NHẬT)
+// Helper function (EXISTING)
 const prepareUser = (acc) => {
   if (!acc) return null;
   const userObj = acc.toObject ? acc.toObject() : acc;
   userObj.id = userObj._id.toString();
   delete userObj._id;
   if (userObj.lockerCode === undefined) userObj.lockerCode = null;
-  if (userObj.registeredLocker === undefined) userObj.registeredLocker = null; // ✅ THÊM DÒNG NÀY
+  if (userObj.registeredLocker === undefined) userObj.registeredLocker = null;
   return userObj;
 };
 
-// ===== Register (✅ ĐÃ CẬP NHẬT: Thêm ghi log) =====
+// ===== Register (EXISTING) =====
 app.post("/register", async (req, res) => {
   try {
     const { name, email, phone, password, hint } = req.body;
@@ -259,11 +258,10 @@ app.post("/register", async (req, res) => {
       password,
       hint,
       lockerCode: null,
-      registeredLocker: null, // ✅ THÊM DÒNG NÀY
+      registeredLocker: null,
     });
     await acc.save();
 
-    // ✅ GHI LOG: Ghi lại sự kiện đăng ký
     const newHistoryEvent = new History({
       userId: acc._id,
       action: "REGISTERED",
@@ -275,11 +273,12 @@ app.post("/register", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// ===== Login (Sửa để trả về User chuẩn hóa) =====
+
+// ===== Login (EXISTING) =====
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const acc = await Account.findOne({ email, password }).lean(); // Dùng .lean()
+    const acc = await Account.findOne({ email, password }).lean();
     if (!acc) return res.status(401).json({ error: "Sai thông tin đăng nhập" });
 
     res.json({ message: "✅ Đăng nhập thành công", user: prepareUser(acc) });
@@ -288,10 +287,9 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// ===== Update User (✅ ĐÃ CẬP NHẬT) =====
+// ===== Update User (EXISTING) =====
 app.post("/update", async (req, res) => {
   try {
-    // ✅ 1. Thêm registeredLocker vào danh sách lấy ra
     const {
       id,
       name,
@@ -303,8 +301,6 @@ app.post("/update", async (req, res) => {
       registeredLocker,
     } = req.body;
 
-    // ✅ 2. Xây dựng đối tượng cập nhật động
-    //    Điều này đảm bảo chỉ các trường được gửi lên mới bị thay đổi
     const fieldsToUpdate = {};
     if (name !== undefined) fieldsToUpdate.name = name;
     if (email !== undefined) fieldsToUpdate.email = email;
@@ -312,14 +308,12 @@ app.post("/update", async (req, res) => {
     if (password !== undefined) fieldsToUpdate.password = password;
     if (hint !== undefined) fieldsToUpdate.hint = hint;
     if (lockerCode !== undefined) fieldsToUpdate.lockerCode = lockerCode;
-    // ✅ Xử lý registeredLocker (cho phép set thành null khi hủy đăng ký)
     if (registeredLocker !== undefined)
       fieldsToUpdate.registeredLocker = registeredLocker;
 
-    // ✅ 3. Sử dụng $set để cập nhật, thay vì ghi đè
     const updated = await Account.findByIdAndUpdate(
       id,
-      { $set: fieldsToUpdate }, // Chỉ cập nhật các trường được cung cấp
+      { $set: fieldsToUpdate },
       { new: true }
     ).lean();
 
@@ -334,7 +328,7 @@ app.post("/update", async (req, res) => {
   }
 });
 
-// ===== Lấy lại user theo ID (Để reload user) =====
+// ===== Lấy lại user theo ID (EXISTING) =====
 app.get("/user/:id", async (req, res) => {
   try {
     const user = await Account.findById(req.params.id).lean();
@@ -355,19 +349,18 @@ const lockerStateSchema = new mongoose.Schema(
       enum: ["EMPTY", "LOCKED", "OPEN"],
       default: "EMPTY",
     },
-    ownerId: { type: String, default: null }, // ID của người đang thuê/mở
+    ownerId: { type: String, default: null },
     timestamp: { type: Date, default: Date.now },
   },
   { collection: "locker_states" }
 );
 const LockerState = mongoose.model("LockerState", lockerStateSchema);
 
-// Endpoint 1: Lấy trạng thái tất cả tủ
+// Endpoint 1: Lấy trạng thái tất cả tủ (EXISTING)
 app.get("/lockers/status", async (req, res) => {
+  // ... (code không đổi) ...
   try {
-    // Khởi tạo các tủ nếu chưa có (1 đến 9)
     const allLockers = await LockerState.find().lean();
-    const initialLockers = [];
     for (let i = 1; i <= 9; i++) {
       const id = i.toString().padStart(2, "0");
       const exists = allLockers.find((l) => l.lockerId === id);
@@ -379,7 +372,6 @@ app.get("/lockers/status", async (req, res) => {
         );
       }
     }
-
     const finalLockers = await LockerState.find().lean();
     res.json({
       success: true,
@@ -397,19 +389,16 @@ app.get("/lockers/status", async (req, res) => {
   }
 });
 
-// Endpoint 2: Cập nhật trạng thái tủ (✅ ĐÃ CẬP NHẬT: Thêm ghi log "LOCKED")
+// Endpoint 2: Cập nhật trạng thái tủ (EXISTING - Ghi log "LOCKED")
 app.post("/lockers/update", async (req, res) => {
   try {
     const { lockerId, status, ownerId } = req.body;
 
-    // ✅ GHI LOG: Nếu hành động là 'LOCKED'
     if (status === "LOCKED") {
-      // Tìm xem tủ này trước đó thuộc về ai
       const currentState = await LockerState.findOne({ lockerId }).lean();
       if (currentState && currentState.ownerId) {
-        // Ghi lại sự kiện ĐÓNG cho người chủ cũ
         const newHistoryEvent = new History({
-          userId: currentState.ownerId, // Dùng ownerId cũ
+          userId: currentState.ownerId,
           lockerId: lockerId,
           action: "LOCKED",
         });
@@ -417,7 +406,6 @@ app.post("/lockers/update", async (req, res) => {
       }
     }
 
-    // Tiếp tục cập nhật trạng thái
     const updatedLocker = await LockerState.findOneAndUpdate(
       { lockerId },
       { status, ownerId: ownerId || null, timestamp: new Date() },
@@ -429,7 +417,6 @@ app.post("/lockers/update", async (req, res) => {
         .status(404)
         .json({ success: false, error: "Không tìm thấy tủ: " + lockerId });
     }
-
     res.json({
       success: true,
       locker: {
@@ -547,54 +534,67 @@ app.post("/raspi/recognize-remote", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// ENDPOINT /raspi/unlock (✅ ĐÃ CẬP NHẬT: Thêm ghi log "OPENED")
+// ✅ ===== ENDPOINT /raspi/unlock (ĐÃ THÊM LOG DEBUG) =====
 app.post("/raspi/unlock", async (req, res) => {
+  console.log("--- Received request at /raspi/unlock ---"); // Log khi nhận request
+  console.log("Request body:", req.body); // Log nội dung request
+
   try {
     const { lockerId, user: userEmail } = req.body;
 
-    // ✅ ===== GHI LOG: Ghi lại sự kiện MỞ =====
+    // Log thông tin nhận được
+    console.log(
+      `Attempting to log OPENED event for locker ${lockerId}, user email ${userEmail}`
+    );
+
     if (userEmail) {
+      console.log("Finding user by email...");
       const user = await Account.findOne({ email: userEmail }).lean();
+
       if (user) {
+        console.log("User found:", user._id); // Log ID của user
         const newHistoryEvent = new History({
-          userId: user._id,
+          userId: user._id, // Dùng _id (ObjectId)
           lockerId: lockerId,
-          action: "OPENED", // <--- Lưu hành động MỞ ở đây
+          action: "OPENED",
         });
+        console.log("Attempting to save history event:", newHistoryEvent);
         await newHistoryEvent.save(); // Lưu vào collection 'history'
+        console.log("✅ History event saved successfully!"); // Log khi lưu thành công
       } else {
-        // Ghi log lỗi nếu không tìm thấy user theo email
         console.error(
-          `History log failed: User not found for email ${userEmail} during unlock`
+          `❌ History log failed: User not found for email ${userEmail}`
         );
       }
     } else {
-      // Ghi log lỗi nếu email không được gửi lên
       console.error(
-        "History log failed: User email not provided during unlock"
+        "❌ History log failed: User email not provided in request body"
       );
     }
-    // ✅ ===== KẾT THÚC PHẦN GHI LOG =====
 
-    // Chuyển tiếp (forward) request đến RASPI_URL (Phần này giữ nguyên)
+    // Chuyển tiếp (forward) request đến RASPI_URL
+    console.log("Forwarding unlock request to Pi:", RASPI_URL);
     const r = await fetch(`${RASPI_URL}/unlock`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(req.body), // Gửi thông tin (lockerId, user)
+      body: JSON.stringify(req.body),
     });
     const data = await r.json();
+    console.log("Response from Pi:", data); // Log phản hồi từ Pi
     res.json(data); // Gửi phản hồi từ Pi về lại cho client
   } catch (err) {
-    // Nếu Pi bị lỗi hoặc offline, vẫn trả về JSON
+    // Log lỗi chi tiết
+    console.error("❌ Error in /raspi/unlock endpoint:", err);
     res.status(500).json({ success: false, error: err.message });
+  } finally {
+    console.log("--- Finished processing /raspi/unlock ---"); // Log khi kết thúc
   }
 });
 
-// ✅ ===== ENDPOINT MỚI: Lấy lịch sử =====
+// ===== ENDPOINT LẤY LỊCH SỬ (EXISTING) =====
 app.get("/history/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
-    // Tìm tất cả lịch sử của user này, sắp xếp mới nhất lên đầu
     const history = await History.find({ userId: userId }).sort({
       timestamp: -1,
     });
@@ -604,10 +604,10 @@ app.get("/history/:userId", async (req, res) => {
   }
 });
 
-// ===== Start Server =====
+// ===== Start Server (Không đổi) =====
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () =>
   console.log(
-    `🚀 Server running on port ${PORT} (lockerCode + RasPi bridge ready)`
+    `🚀 Server running on port ${PORT} (with detailed unlock logging)`
   )
 );
