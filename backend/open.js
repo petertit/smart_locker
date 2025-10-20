@@ -252,10 +252,12 @@ function handleLockerClick(lockerId) {
   if (state.status === "EMPTY") {
     // Tủ trống: Yêu cầu đăng ký
 
-    // ✅ KIỂM TRA 1 TỦ/TÀI KHOẢN (Sửa: kiểm tra currentUser)
-    if (currentUser.registeredLocker) {
+    // ✅ ===== SỬA LỖI 1 =====
+    // Kiểm tra xem registeredLocker có phải là một chuỗi hợp lệ (không rỗng, không phải 'null', không phải 'undefined')
+    const userLocker = currentUser.registeredLocker;
+    if (userLocker && userLocker !== "null" && userLocker !== "undefined") {
       alert(
-        `Bạn đã đăng ký tủ ${currentUser.registeredLocker}. Vui lòng hủy đăng ký tủ đó trước khi đăng ký tủ mới.`
+        `Bạn đã đăng ký tủ ${userLocker}. Vui lòng hủy đăng ký tủ đó trước khi đăng ký tủ mới.`
       );
       return;
     }
@@ -292,7 +294,7 @@ function handleCloseLocker(lockerId) {
   }
 }
 
-// 5. ✅ Xử lý hủy đăng ký (✅ ĐÃ CẬP NHẬT)
+// 5. Xử lý hủy đăng ký
 async function handleUnregister(lockerId) {
   if (
     confirm(
@@ -341,7 +343,7 @@ window.handleLogoutAndLock = function () {
   }
 };
 
-// 7. Xử lý mở tủ thành công (Callback) (✅ ĐÃ CẬP NHẬT)
+// 7. Xử lý mở tủ thành công (Callback)
 window.openLockerSuccess = (lockerId) => {
   if (!lockerId) {
     alert("Lỗi: Không tìm thấy lockerId để mở.");
@@ -364,11 +366,15 @@ window.openLockerSuccess = (lockerId) => {
       return updateLockerStatus(lockerId, "OPEN", currentUserId);
     })
     .then(async (lockerUpdated) => {
-      // ✅ Thêm async
       if (lockerUpdated) {
-        // ✅ 3. LƯU TỦ VÀO TÀI KHOẢN USER
+        // ✅ ===== SỬA LỖI 2 =====
         // Chỉ lưu nếu đây là lần đăng ký đầu tiên (user chưa có tủ)
-        if (!currentUser.registeredLocker) {
+        const userLocker = currentUser.registeredLocker;
+        if (
+          !userLocker ||
+          userLocker === "null" ||
+          userLocker === "undefined"
+        ) {
           await updateUserField("registeredLocker", lockerId);
         }
 
