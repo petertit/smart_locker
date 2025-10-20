@@ -550,17 +550,16 @@ app.post("/raspi/recognize-remote", async (req, res) => {
 // ENDPOINT /raspi/unlock (✅ ĐÃ CẬP NHẬT: Thêm ghi log "OPENED")
 app.post("/raspi/unlock", async (req, res) => {
   try {
-    const { lockerId, user: userEmail } = req.body; // 'user' là email
+    const { lockerId, user: userEmail } = req.body;
 
     // ✅ ===== GHI LOG: Ghi lại sự kiện MỞ =====
     if (userEmail) {
-      // Tìm ID của user dựa trên email
       const user = await Account.findOne({ email: userEmail }).lean();
       if (user) {
         const newHistoryEvent = new History({
-          userId: user._id, // Dùng _id (ObjectId) của user tìm được
+          userId: user._id,
           lockerId: lockerId,
-          action: "OPENED", // Ghi hành động MỞ
+          action: "OPENED", // <--- Lưu hành động MỞ ở đây
         });
         await newHistoryEvent.save(); // Lưu vào collection 'history'
       } else {
