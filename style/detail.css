@@ -109,6 +109,8 @@ body {
 #name,
 #phone,
 #password,
+#lockerCode,
+#registeredLocker,
 #hint {
   font-family: "Epilogue", sans-serif;
   font-size: 30px;
