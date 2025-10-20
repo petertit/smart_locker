@@ -252,15 +252,19 @@ function handleLockerClick(lockerId) {
   if (state.status === "EMPTY") {
     // Tủ trống: Yêu cầu đăng ký
 
-    // ✅ ===== SỬA LỖI 1 =====
-    // Kiểm tra xem registeredLocker có phải là một chuỗi hợp lệ (không rỗng, không phải 'null', không phải 'undefined')
+    // ✅ ===== SỬA LỖI KIỂM TRA NGHIÊM NGẶT HƠN =====
     const userLocker = currentUser.registeredLocker;
-    if (userLocker && userLocker !== "null" && userLocker !== "undefined") {
+    // Kiểm tra xem userLocker có phải là một chuỗi gồm 2 chữ số hay không
+    const hasValidLocker = /^\d{2}$/.test(userLocker);
+
+    if (hasValidLocker) {
+      // Chỉ chặn nếu có một mã tủ hợp lệ
       alert(
         `Bạn đã đăng ký tủ ${userLocker}. Vui lòng hủy đăng ký tủ đó trước khi đăng ký tủ mới.`
       );
       return;
     }
+    // Nếu userLocker là null, undefined, "", "null", "undefined", etc. -> Cho phép đăng ký
 
     if (confirm(`Tủ ${lockerId} đang trống. Bạn muốn đăng ký và mở tủ?`)) {
       sessionStorage.setItem("locker_to_open", lockerId);
