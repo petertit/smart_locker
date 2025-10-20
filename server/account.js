@@ -203,7 +203,7 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB Atlas"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// ===== User Schema (EXISTING) =====
+// ===== User Schema (✅ ĐÃ CẬP NHẬT) =====
 const accountSchema = new mongoose.Schema(
   {
     name: String,
@@ -211,7 +211,8 @@ const accountSchema = new mongoose.Schema(
     phone: String,
     password: String,
     hint: String,
-    lockerCode: { type: String, default: null }, // ✅ Đã thêm lockerCode
+    lockerCode: { type: String, default: null },
+    registeredLocker: { type: String, default: null }, // ✅ THÊM DÒNG NÀY
   },
   { collection: "account" }
 );
@@ -230,13 +231,14 @@ const historySchema = new mongoose.Schema(
 );
 const History = mongoose.model("History", historySchema);
 
-// Helper function (EXISTING)
+// Helper function (✅ ĐÃ CẬP NHẬT)
 const prepareUser = (acc) => {
   if (!acc) return null;
   const userObj = acc.toObject ? acc.toObject() : acc;
   userObj.id = userObj._id.toString();
   delete userObj._id;
   if (userObj.lockerCode === undefined) userObj.lockerCode = null;
+  if (userObj.registeredLocker === undefined) userObj.registeredLocker = null; // ✅ THÊM DÒNG NÀY
   return userObj;
 };
 
@@ -257,6 +259,7 @@ app.post("/register", async (req, res) => {
       password,
       hint,
       lockerCode: null,
+      registeredLocker: null, // ✅ THÊM DÒNG NÀY
     });
     await acc.save();
 
@@ -285,16 +288,40 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// ===== Update User (Bao gồm lockerCode) =====
+// ===== Update User (✅ ĐÃ CẬP NHẬT) =====
 app.post("/update", async (req, res) => {
   try {
-    const { id, name, email, phone, password, hint, lockerCode } = req.body;
+    // ✅ 1. Thêm registeredLocker vào danh sách lấy ra
+    const {
+      id,
+      name,
+      email,
+      phone,
+      password,
+      hint,
+      lockerCode,
+      registeredLocker,
+    } = req.body;
 
+    // ✅ 2. Xây dựng đối tượng cập nhật động
+    //    Điều này đảm bảo chỉ các trường được gửi lên mới bị thay đổi
+    const fieldsToUpdate = {};
+    if (name !== undefined) fieldsToUpdate.name = name;
+    if (email !== undefined) fieldsToUpdate.email = email;
+    if (phone !== undefined) fieldsToUpdate.phone = phone;
+    if (password !== undefined) fieldsToUpdate.password = password;
+    if (hint !== undefined) fieldsToUpdate.hint = hint;
+    if (lockerCode !== undefined) fieldsToUpdate.lockerCode = lockerCode;
+    // ✅ Xử lý registeredLocker (cho phép set thành null khi hủy đăng ký)
+    if (registeredLocker !== undefined)
+      fieldsToUpdate.registeredLocker = registeredLocker;
+
+    // ✅ 3. Sử dụng $set để cập nhật, thay vì ghi đè
     const updated = await Account.findByIdAndUpdate(
       id,
-      { name, email, phone, password, hint, lockerCode },
+      { $set: fieldsToUpdate }, // Chỉ cập nhật các trường được cung cấp
       { new: true }
-    ).lean(); // Dùng .lean()
+    ).lean();
 
     if (!updated) return res.status(404).json({ error: "User not found" });
 

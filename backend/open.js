@@ -10,16 +10,38 @@ const currentUserId = currentUser ? currentUser.id : null;
 let lockerStates = {};
 
 /**
- * Helper: Kiểm tra xem người dùng hiện tại đã đăng ký tủ nào chưa
- * @returns {object | null} Trạng thái của tủ đã đăng ký, hoặc null
+ * Helper: Cập nhật thông tin user (chỉ 1 trường) trên server
+ * @param {string} field Tên trường (ví dụ: 'registeredLocker')
+ * @param {string | null} value Giá trị mới
  */
-function getUserLocker() {
-  for (const lockerId in lockerStates) {
-    if (lockerStates[lockerId].userId === currentUserId) {
-      return { ...lockerStates[lockerId], lockerId: lockerId };
+async function updateUserField(field, value) {
+  if (!currentUserId) return false;
+
+  try {
+    const res = await fetch(`${RENDER_BRIDGE}/update`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: currentUserId,
+        [field]: value, // Gửi chỉ 1 trường cần cập nhật
+      }),
+    });
+
+    const data = await res.json();
+    if (res.ok && data.user) {
+      // Cập nhật sessionStorage
+      sessionStorage.setItem("user", JSON.stringify(data.user));
+      // Cập nhật biến global
+      Object.assign(currentUser, data.user);
+      return true;
+    } else {
+      alert(`❌ Lỗi cập nhật user: ${data.error || "Unknown error"}`);
+      return false;
     }
+  } catch (err) {
+    alert(`❌ Lỗi mạng khi cập nhật user: ${err.message}`);
+    return false;
   }
-  return null;
 }
 
 // 1. Quản lý trạng thái tủ khóa trên MongoDB Atlas
@@ -122,7 +144,7 @@ function updateGridUI() {
         item.style.backgroundColor = "rgba(255, 0, 0, 0.4)";
         item.style.border = "2px solid red";
 
-        // ✅ THÊM NÚT HỦY ĐĂNG KÝ
+        // THÊM NÚT HỦY ĐĂNG KÝ
         const unregisterBtn = document.createElement("button");
         unregisterBtn.textContent = "HỦY ĐĂNG KÝ";
         unregisterBtn.className = "unregister-btn";
@@ -230,11 +252,10 @@ function handleLockerClick(lockerId) {
   if (state.status === "EMPTY") {
     // Tủ trống: Yêu cầu đăng ký
 
-    // ✅ KIỂM TRA 1 TỦ/TÀI KHOẢN
-    const existingLocker = getUserLocker();
-    if (existingLocker) {
+    // ✅ KIỂM TRA 1 TỦ/TÀI KHOẢN (Sửa: kiểm tra currentUser)
+    if (currentUser.registeredLocker) {
       alert(
-        `Bạn đã đăng ký tủ ${existingLocker.lockerId}. Vui lòng hủy đăng ký tủ đó trước khi đăng ký tủ mới.`
+        `Bạn đã đăng ký tủ ${currentUser.registeredLocker}. Vui lòng hủy đăng ký tủ đó trước khi đăng ký tủ mới.`
       );
       return;
     }
@@ -246,7 +267,6 @@ function handleLockerClick(lockerId) {
   } else if (state.userId === currentUserId) {
     // Tủ của tôi:
     if (state.status === "LOCKED") {
-      // ✅ SỬA LỖI: Đây là logic mở lại tủ
       if (confirm(`Đây là tủ của bạn. Bạn muốn mở khóa tủ ${lockerId}?`)) {
         sessionStorage.setItem("locker_to_open", lockerId);
         window.location.href = "./face_log.html";
@@ -268,19 +288,25 @@ function handleLockerClick(lockerId) {
 // 4. Xử lý đóng tủ
 function handleCloseLocker(lockerId) {
   if (confirm(`Bạn có chắc muốn đóng tủ ${lockerId} và khóa nó?`)) {
-    // ✅ SỬA LỖI: Giữ lại currentUserId khi đóng
     updateLockerStatus(lockerId, "LOCKED", currentUserId);
   }
 }
 
-// 5. ✅ Xử lý hủy đăng ký
-function handleUnregister(lockerId) {
+// 5. ✅ Xử lý hủy đăng ký (✅ ĐÃ CẬP NHẬT)
+async function handleUnregister(lockerId) {
   if (
     confirm(
       `Bạn có chắc muốn hủy đăng ký tủ ${lockerId}? Hành động này sẽ xóa quyền sở hữu của bạn và tủ sẽ trở nên trống.`
     )
   ) {
-    updateLockerStatus(lockerId, "EMPTY", null);
+    // 1. Cập nhật tủ về EMPTY
+    const lockerUpdated = await updateLockerStatus(lockerId, "EMPTY", null);
+
+    if (lockerUpdated) {
+      // 2. Cập nhật user, gỡ bỏ tủ đã đăng ký
+      await updateUserField("registeredLocker", null);
+      alert(`Đã hủy đăng ký tủ ${lockerId}.`);
+    }
   }
 }
 
@@ -315,7 +341,7 @@ window.handleLogoutAndLock = function () {
   }
 };
 
-// 7. Xử lý mở tủ thành công (Callback)
+// 7. Xử lý mở tủ thành công (Callback) (✅ ĐÃ CẬP NHẬT)
 window.openLockerSuccess = (lockerId) => {
   if (!lockerId) {
     alert("Lỗi: Không tìm thấy lockerId để mở.");
@@ -331,17 +357,23 @@ window.openLockerSuccess = (lockerId) => {
     .then((res) => res.json())
     .then((unlockData) => {
       if (!unlockData.success && unlockData.error) {
-        // Vẫn tiếp tục ngay cả khi Pi lỗi, nhưng báo cho người dùng
         alert("⚠️ Không thể gửi lệnh mở khóa đến Pi: " + unlockData.error);
       }
 
       // 2. Cập nhật trạng thái DB thành 'OPEN' và GÁN QUYỀN SỞ HỮU
       return updateLockerStatus(lockerId, "OPEN", currentUserId);
     })
-    .then((success) => {
-      if (success) {
+    .then(async (lockerUpdated) => {
+      // ✅ Thêm async
+      if (lockerUpdated) {
+        // ✅ 3. LƯU TỦ VÀO TÀI KHOẢN USER
+        // Chỉ lưu nếu đây là lần đăng ký đầu tiên (user chưa có tủ)
+        if (!currentUser.registeredLocker) {
+          await updateUserField("registeredLocker", lockerId);
+        }
+
         alert(`🔓 Tủ ${lockerId} đã mở thành công!`);
-        // 3. Chuyển hướng về trang Open.html
+        // 4. Chuyển hướng về trang Open.html
         window.location.href = "./open.html";
       } else {
         alert(`❌ Không thể cập nhật trạng thái tủ ${lockerId}.`);
