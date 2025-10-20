@@ -552,32 +552,21 @@ app.post("/raspi/unlock", async (req, res) => {
   try {
     const { lockerId, user: userEmail } = req.body; // 'user' là email
 
-    // ✅ ===== GHI LOG: Ghi lại sự kiện MỞ =====
+    // ✅ GHI LOG: Ghi lại sự kiện MỞ
     if (userEmail) {
       // Tìm ID của user dựa trên email
       const user = await Account.findOne({ email: userEmail }).lean();
       if (user) {
         const newHistoryEvent = new History({
-          userId: user._id, // Dùng _id (ObjectId) của user tìm được
+          userId: user._id, // Dùng _id (ObjectId)
           lockerId: lockerId,
-          action: "OPENED", // Ghi hành động MỞ
+          action: "OPENED",
         });
-        await newHistoryEvent.save(); // Lưu vào collection 'history'
-      } else {
-        // Ghi log lỗi nếu không tìm thấy user theo email
-        console.error(
-          `History log failed: User not found for email ${userEmail} during unlock`
-        );
+        await newHistoryEvent.save();
       }
-    } else {
-      // Ghi log lỗi nếu email không được gửi lên
-      console.error(
-        "History log failed: User email not provided during unlock"
-      );
     }
-    // ✅ ===== KẾT THÚC PHẦN GHI LOG =====
 
-    // Chuyển tiếp (forward) request đến RASPI_URL (Phần này giữ nguyên)
+    // Chuyển tiếp (forward) request đến RASPI_URL
     const r = await fetch(`${RASPI_URL}/unlock`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
