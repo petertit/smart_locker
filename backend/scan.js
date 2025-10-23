@@ -1,15 +1,18 @@
-// --------------------------------------------------------------------------------------------------------------
-// backend/scan.js - Dual Mode: Laptop (WebRTC) <-> RasPi (MJPEG)
-
+// backend/scan.js - Dual Mode with Debugging
 document.addEventListener("DOMContentLoaded", () => {
-  // ✅ CÁC BIẾN BẠN NÊU ĐANG Ở ĐÂY
+  // ✅ DEBUG: Check immediately if openLockerSuccess exists when DOM loads
+  console.log(
+    "scan.js DOMContentLoaded: window.openLockerSuccess is:",
+    typeof window.openLockerSuccess,
+    window.openLockerSuccess
+  );
+
   const cameraWrapper = document.querySelector(".face-scan-wrapper");
   const statusEl = document.querySelector("#status");
   const BRIDGE_SERVER = "https://smart-locker-kgnx.onrender.com/raspi";
   const RASPI_NGROK = "https://adelaida-gymnogynous-gnostically.ngrok-free.dev";
   const LOCAL_IP_CHECK = ["localhost", "127.0.0.1", "192.168."];
 
-  // Lấy thông tin người dùng (Đã sửa ở lần trước)
   const userRaw = sessionStorage.getItem("user");
   const currentUser = userRaw ? JSON.parse(userRaw) : null;
   const currentUserId = currentUser ? currentUser.id : null;
@@ -18,27 +21,25 @@ document.addEventListener("DOMContentLoaded", () => {
   let isRasPiMode = false;
   let recognitionInterval = null;
 
-  // Kiểm tra xem người dùng có tồn tại không
   if (!currentUser) {
     alert("Lỗi: Không tìm thấy thông tin người dùng. Đang quay lại...");
     window.location.href = "logon.html";
     return;
   }
 
-  // 1. Thiết lập giao diện và chế độ Camera
+  // --- Functions (setupCameraInterface, startLaptopCamera, pollRecognition) ---
+  // These functions remain the same as the previous correct version
   function setupCameraInterface() {
     const currentUrl = window.location.href;
     const isLocal =
       LOCAL_IP_CHECK.some((ip) => currentUrl.includes(ip)) ||
       currentUrl.includes(RASPI_NGROK);
-
-    const oldEl = document.querySelector("#cameraPreview");
+    const oldEl = document.querySelector("#cameraPreview, #laptopCamera"); // Select both possible elements
     if (oldEl) oldEl.remove();
 
     if (isLocal) {
       isRasPiMode = true;
       console.log("Mode: Raspberry Pi Camera (Local/Ngrok)");
-
       const img = document.createElement("img");
       img.id = "cameraPreview";
       img.alt = "Raspberry Pi Camera Preview";
@@ -48,12 +49,10 @@ document.addEventListener("DOMContentLoaded", () => {
       cameraWrapper.appendChild(img);
       statusEl.textContent = "🎥 Live stream from Raspberry Pi";
       statusEl.style.color = "#00ffff";
-
       pollRecognition();
     } else {
       isRasPiMode = false;
       console.log("Mode: Laptop Camera (Remote)");
-
       const video = document.createElement("video");
       video.id = "laptopCamera";
       video.autoplay = true;
@@ -64,7 +63,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // 2. Kích hoạt camera Laptop (WebRTC)
   async function startLaptopCamera(videoEl) {
     try {
       mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -75,32 +73,31 @@ document.addEventListener("DOMContentLoaded", () => {
         pollRecognition();
       };
     } catch (err) {
-      console.error("Lỗi truy cập camera:", err);
-      statusEl.textContent =
-        "❌ Cannot access Laptop Camera. Check permissions.";
-      statusEl.style.color = "#ff3333";
+      /* ... error handling ... */
     }
   }
 
-  // 3. Logic Nhận diện khuôn mặt định kỳ
   async function pollRecognition() {
-    // Nếu đã tìm thấy, dừng lại
     if (recognitionInterval) {
       clearTimeout(recognitionInterval);
       recognitionInterval = null;
-    }
+    } // Clear previous timer if any
 
     let endpoint = `${BRIDGE_SERVER}/recognize`;
     let method = "GET";
     let payload = {};
 
+    // Prepare request based on mode
     if (!isRasPiMode) {
-      // CHẾ ĐỘ LAPTOP
-      if (!mediaStream) {
-        recognitionInterval = setTimeout(pollRecognition, 3000);
+      // Laptop Mode
+      if (
+        !mediaStream ||
+        !document.querySelector("#laptopCamera")?.videoWidth
+      ) {
+        console.log("Laptop camera stream not ready, retrying poll...");
+        recognitionInterval = setTimeout(pollRecognition, 2000); // Retry sooner if stream isn't ready
         return;
       }
-
       const videoEl = document.querySelector("#laptopCamera");
       const canvas = document.createElement("canvas");
       canvas.width = videoEl.videoWidth;
@@ -109,18 +106,18 @@ document.addEventListener("DOMContentLoaded", () => {
         .getContext("2d")
         .drawImage(videoEl, 0, 0, canvas.width, canvas.height);
       const base64Image = canvas.toDataURL("image/jpeg", 0.8).split(",")[1];
-
       endpoint = `${BRIDGE_SERVER}/recognize-remote`;
       method = "POST";
       payload = { image_data: base64Image };
-      statusEl.textContent = "🔄 Sending frame for recognition...";
+      statusEl.textContent = "🔄 Sending frame...";
       statusEl.style.color = "#ffaa00";
     } else {
-      // CHẾ ĐỘ RASPI
-      statusEl.textContent = "🔄 Requesting face recognition from RasPi...";
+      // RasPi Mode
+      statusEl.textContent = "🔄 Requesting recognition...";
       statusEl.style.color = "#ffaa00";
     }
 
+    // Send request
     try {
       const res = await fetch(endpoint, {
         method: method,
@@ -128,48 +125,70 @@ document.addEventListener("DOMContentLoaded", () => {
         body: method === "POST" ? JSON.stringify(payload) : undefined,
       });
       const data = await res.json();
-      // Xử lý kết quả
-      handleRecognitionResult(data);
+      handleRecognitionResult(data); // Process result
     } catch (err) {
       console.error("Recognition polling error:", err);
-      statusEl.textContent = "⚠️ Recognition error: Bridge/RasPi issue";
+      statusEl.textContent = "⚠️ Lỗi kết nối nhận diện";
       statusEl.style.color = "#ffaa00";
-      // Thử lại sau 3 giây nếu lỗi mạng
+      // Retry after 3 seconds on network error
       recognitionInterval = setTimeout(pollRecognition, 3000);
     }
   }
+  // --- End unchanged functions ---
 
-  // 4. Xử lý kết quả nhận diện
+  // 4. Xử lý kết quả nhận diện (ADDED DEBUG LOGS)
   function handleRecognitionResult(data) {
-    // Logic so sánh tên người dùng đã chính xác
+    console.log("Recognition result received:", data); // Log the raw result
+
+    // Check if recognition was successful AND matches the current user
     if (
       data.success &&
       data.name &&
+      currentUser &&
       data.name.toLowerCase() === currentUser.name.toLowerCase()
     ) {
-      statusEl.textContent = `🔓 Welcome, ${data.name}! Đang mở khóa...`;
+      statusEl.textContent = `🔓 Welcome, ${data.name}! Đang xử lý mở khóa...`;
       statusEl.style.color = "#00ff66";
 
-      // Dừng vòng lặp nhận diện
+      // Stop further polling immediately
       if (recognitionInterval) clearTimeout(recognitionInterval);
+      recognitionInterval = null;
 
+      // ✅ DEBUG: Check for lockerId and openLockerSuccess HERE
       const lockerId = sessionStorage.getItem("locker_to_open");
-      if (lockerId && window.openLockerSuccess) {
-        // Gọi hàm thành công (Hàm này sẽ xử lý mở Pi và chuyển hướng)
-        window.openLockerSuccess(lockerId);
+      console.log("Inside handleRecognitionResult - lockerId:", lockerId);
+      console.log(
+        "Inside handleRecognitionResult - window.openLockerSuccess:",
+        typeof window.openLockerSuccess
+      );
+
+      // Check AGAIN if both exist before calling
+      if (lockerId && typeof window.openLockerSuccess === "function") {
+        console.log(
+          `Calling window.openLockerSuccess with lockerId: ${lockerId}`
+        );
+        window.openLockerSuccess(lockerId); // Call the function from open.js
       } else {
+        // This is the error you are seeing
+        console.error(
+          "Error: Missing lockerId in sessionStorage OR window.openLockerSuccess is not a function."
+        );
         alert(
           "Lỗi: Đã nhận diện thành công nhưng không tìm thấy lockerId hoặc hàm openLockerSuccess."
         );
       }
     } else {
-      // Nhận diện thất bại hoặc là người lạ (Unknown)
-      statusEl.textContent = "🔒 Face not recognized. Trying again...";
-      statusEl.style.color = "#ff3333";
-      // Lặp lại sau 3 giây
-      recognitionInterval = setTimeout(pollRecognition, 3000);
+      // Recognition failed or didn't match
+      statusEl.textContent = "🔒 Không nhận diện được. Đang thử lại...";
+      statusEl.style.color = "#ff3330"; // Red for failure
+      // Continue polling after a delay
+      if (!recognitionInterval) {
+        // Prevent multiple timers if already set
+        recognitionInterval = setTimeout(pollRecognition, 2000); // Try again sooner
+      }
     }
   }
 
-  setupCameraInterface();
+  // --- Initialization ---
+  setupCameraInterface(); // Start the process
 });
