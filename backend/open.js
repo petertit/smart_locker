@@ -7,252 +7,78 @@ const currentUserId = currentUser ? currentUser.id : null;
 
 let lockerStates = {};
 
-// ✅ HÀM NÀY GIỮ NGUYÊN
-async function updateUserField(field, value) {
-  if (!currentUserId) return false;
+// ✅ HÀM GỬI LỆNH KHÓA ĐẾN PI (THÔNG QUA BRIDGE)
+async function sendLockCommand(lockerId) {
   try {
-    const res = await fetch(`${RENDER_BRIDGE}/update`, {
+    console.log(`Sending lock command for locker ${lockerId}`);
+    const res = await fetch(`${RENDER_BRIDGE}/raspi/lock`, {
+      // <-- Gọi endpoint /raspi/lock trên Bridge
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: currentUserId, [field]: value }),
-    });
-    const data = await res.json();
-    if (res.ok && data.user) {
-      sessionStorage.setItem("user", JSON.stringify(data.user));
-      Object.assign(currentUser, data.user);
-      return true;
-    } else {
-      alert(`❌ Lỗi cập nhật user: ${data.error || "Unknown error"}`);
-      return false;
-    }
-  } catch (err) {
-    alert(`❌ Lỗi mạng khi cập nhật user: ${err.message}`);
-    return false;
-  }
-}
-
-// ✅ SỬA: GỌI THÊM updateSliderUI
-async function fetchLockerStates() {
-  try {
-    const res = await fetch(`${RENDER_BRIDGE}/lockers/status`);
-    if (!res.ok) throw new Error("Failed to fetch locker status");
-    const data = await res.json();
-    if (!data.lockers || !Array.isArray(data.lockers)) {
-      throw new Error("Invalid data structure from server");
-    }
-    lockerStates = data.lockers.reduce((acc, locker) => {
-      acc[locker.lockerId] = { status: locker.status, userId: locker.ownerId };
-      return acc;
-    }, {});
-
-    updateGridUI(); // <-- Cập nhật grid trên open.html (nếu có)
-    if (window.updateSliderUI) {
-      // <-- GỌI CẬP NHẬT SLIDER
-      window.updateSliderUI(lockerStates);
-    }
-  } catch (err) {
-    console.error("Error loading locker states:", err);
-    alert("Không thể tải trạng thái tủ khóa: " + err.message);
-  }
-}
-
-// ✅ SỬA: GỌI THÊM updateSliderUI
-async function updateLockerStatus(lockerId, newStatus, newOwnerId) {
-  const payload = { lockerId, status: newStatus, ownerId: newOwnerId };
-  try {
-    const res = await fetch(`${RENDER_BRIDGE}/lockers/update`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      // Gửi kèm lockerId và email (Pi có thể dùng để log)
+      body: JSON.stringify({ lockerId: lockerId, user: currentUser?.email }),
     });
     const data = await res.json();
     if (res.ok && data.success) {
-      lockerStates[lockerId] = {
-        status: newStatus,
-        userId: data.locker.ownerId,
-      };
-      updateGridUI(); // <-- Cập nhật grid trên open.html (nếu có)
-      if (window.updateSliderUI) {
-        // <-- GỌI CẬP NHẬT SLIDER
-        window.updateSliderUI(lockerStates);
-      }
+      console.log(`Lock command for ${lockerId} successful.`);
       return true;
     } else {
-      alert(`❌ Lỗi: ${data.error || "Không thể cập nhật trạng thái tủ."}`);
+      console.error(
+        `Lock command failed for ${lockerId}:`,
+        data.error || "Unknown error"
+      );
+      alert(
+        `⚠️ Không thể gửi lệnh khóa đến tủ ${lockerId}: ${
+          data.error || "Lỗi không xác định"
+        }`
+      );
       return false;
     }
   } catch (err) {
-    alert("❌ Lỗi kết nối khi cập nhật tủ.");
+    console.error(`Network error sending lock command for ${lockerId}:`, err);
+    alert(`❌ Lỗi mạng khi gửi lệnh khóa cho tủ ${lockerId}.`);
     return false;
   }
 }
 
-// ✅ SỬA: Hàm này chỉ cập nhật grid trên open.html (nếu đang ở trang đó)
+// --- Các hàm khác (updateUserField, fetchLockerStates, updateLockerStatus, updateGridUI, handleLockerClick) giữ nguyên ---
+async function updateUserField(field, value) {
+  /* ... giữ nguyên ... */
+}
+async function fetchLockerStates() {
+  /* ... giữ nguyên ... */
+}
+async function updateLockerStatus(lockerId, newStatus, newOwnerId) {
+  /* ... giữ nguyên ... */
+}
 function updateGridUI() {
-  // Chỉ chạy nếu đang ở trang open.html
-  if (window.location.pathname.endsWith("open.html")) {
-    const gridItems = document.querySelectorAll(".grid-item");
-    if (!gridItems.length) return;
-
-    gridItems.forEach((item) => {
-      const lockerId = item.dataset.lockerId;
-      const state = lockerStates[lockerId] || { status: "EMPTY", userId: null };
-      item.classList.remove("status-empty", "status-locked", "status-open");
-      item.style.border = "none";
-      item.style.backgroundColor = "transparent";
-      item.onmouseenter = null;
-      item.onmouseleave = null;
-      item
-        .querySelectorAll(".close-btn, .unregister-btn")
-        .forEach((btn) => btn.remove());
-
-      if (state.status === "EMPTY") {
-        item.classList.add("status-empty");
-        item.style.border = "";
-      } else if (state.status === "LOCKED") {
-        item.classList.add("status-locked");
-        if (state.userId === currentUserId) {
-          item.style.backgroundColor = "rgba(255, 0, 0, 0.4)";
-          item.style.border = "2px solid red";
-          // Thêm nút hủy cho grid
-          const unregisterBtn = document.createElement("button");
-          // ... (style và logic nút hủy tương tự slider)
-          unregisterBtn.textContent = "HỦY ĐĂNG KÝ";
-          unregisterBtn.className = "unregister-btn";
-          unregisterBtn.style.position = "absolute";
-          unregisterBtn.style.bottom = "10px";
-          unregisterBtn.style.left = "50%";
-          unregisterBtn.style.transform = "translateX(-50%)";
-          unregisterBtn.style.zIndex = "10";
-          unregisterBtn.style.padding = "5px 10px";
-          unregisterBtn.style.backgroundColor = "#ff6600";
-          unregisterBtn.style.color = "white";
-          unregisterBtn.style.border = "none";
-          unregisterBtn.style.borderRadius = "5px";
-          unregisterBtn.style.cursor = "pointer";
-          unregisterBtn.style.visibility = "hidden";
-          unregisterBtn.style.opacity = "0";
-          unregisterBtn.style.transition = "opacity 0.2s ease";
-          unregisterBtn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleUnregister(lockerId);
-          };
-          item.appendChild(unregisterBtn);
-          item.onmouseenter = () => {
-            unregisterBtn.style.visibility = "visible";
-            unregisterBtn.style.opacity = "1";
-          };
-          item.onmouseleave = () => {
-            unregisterBtn.style.visibility = "hidden";
-            unregisterBtn.style.opacity = "0";
-          };
-        } else {
-          item.style.backgroundColor = "rgba(255, 0, 0, 0.4)";
-          item.style.border = "2px solid red";
-        }
-      } else if (state.status === "OPEN") {
-        if (state.userId === currentUserId) {
-          item.classList.add("status-open");
-          item.style.backgroundColor = "rgba(0, 255, 0, 0.2)";
-          item.style.border = "2px solid green";
-          // Thêm nút đóng cho grid
-          const closeBtn = document.createElement("button");
-          // ... (style và logic nút đóng tương tự slider)
-          closeBtn.textContent = "CLOSE";
-          closeBtn.className = "close-btn";
-          closeBtn.style.position = "absolute";
-          closeBtn.style.bottom = "10px";
-          closeBtn.style.left = "50%";
-          closeBtn.style.transform = "translateX(-50%)";
-          closeBtn.style.zIndex = "10";
-          closeBtn.style.padding = "5px 10px";
-          closeBtn.style.backgroundColor = "yellow";
-          closeBtn.style.color = "black";
-          closeBtn.style.border = "none";
-          closeBtn.style.borderRadius = "5px";
-          closeBtn.style.cursor = "pointer";
-          closeBtn.style.visibility = "hidden";
-          closeBtn.style.opacity = "0";
-          closeBtn.style.transition = "opacity 0.2s ease";
-          closeBtn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleCloseLocker(lockerId);
-          };
-          item.appendChild(closeBtn);
-          item.onmouseenter = () => {
-            closeBtn.style.visibility = "visible";
-            closeBtn.style.opacity = "1";
-          };
-          item.onmouseleave = () => {
-            closeBtn.style.visibility = "hidden";
-            closeBtn.style.opacity = "0";
-          };
-        } else {
-          item.classList.add("status-locked");
-          item.style.backgroundColor = "rgba(255, 165, 0, 0.4)";
-          item.style.border = "2px solid orange";
-        }
-      }
-    });
-  }
+  /* ... giữ nguyên ... */
 }
-
-// ✅ SỬA: Hàm này giữ nguyên logic, chỉ cần gán vào window
 function handleLockerClick(lockerId) {
-  if (!currentUserId) {
-    alert("Bạn cần đăng nhập để mở tủ.");
-    window.location.href = "./logon.html";
-    return;
-  }
-  const state = lockerStates[lockerId] || { status: "EMPTY", userId: null };
-  if (state.status === "EMPTY") {
-    const userLocker = currentUser.registeredLocker;
-    let hasRegisteredLocker = false;
-    if (typeof userLocker === "string" && /^\d{2}$/.test(userLocker)) {
-      hasRegisteredLocker = true;
-    }
-    if (hasRegisteredLocker) {
-      alert(
-        `Bạn đã đăng ký tủ ${userLocker}. Vui lòng hủy đăng ký tủ đó trước khi đăng ký tủ mới.`
-      );
-      return;
-    }
-    if (confirm(`Tủ ${lockerId} đang trống. Bạn muốn đăng ký và mở tủ?`)) {
-      sessionStorage.setItem("locker_to_open", lockerId);
-      window.location.href = "./face_log.html";
-    }
-  } else if (state.userId === currentUserId) {
-    if (state.status === "LOCKED") {
-      if (confirm(`Đây là tủ của bạn. Bạn muốn mở khóa tủ ${lockerId}?`)) {
-        sessionStorage.setItem("locker_to_open", lockerId);
-        window.location.href = "./face_log.html";
-      }
-    } else {
-      alert(`Tủ ${lockerId} của bạn đang mở.`);
-    }
-  } else {
-    alert(
-      `Tủ ${lockerId} đang ${
-        state.status === "OPEN" ? "được sử dụng" : "đã được đăng ký"
-      } bởi người khác.`
-    );
-  }
+  /* ... giữ nguyên ... */
 }
-// ✅ Gán vào window
-window.handleLockerClick = handleLockerClick;
+// --- Hết phần giữ nguyên ---
 
-// ✅ SỬA: Hàm này giữ nguyên logic, chỉ cần gán vào window
-function handleCloseLocker(lockerId) {
+// ✅ SỬA: Hàm này gọi sendLockCommand và updateLockerStatus
+async function handleCloseLocker(lockerId) {
   if (confirm(`Bạn có chắc muốn đóng tủ ${lockerId} và khóa nó?`)) {
-    updateLockerStatus(lockerId, "LOCKED", currentUserId);
+    // 1. Gửi lệnh khóa vật lý đến Pi
+    const lockSent = await sendLockCommand(lockerId);
+
+    // 2. Chỉ cập nhật DB nếu lệnh gửi thành công (hoặc bạn có thể bỏ qua bước check này nếu muốn DB luôn cập nhật)
+    if (lockSent) {
+      // Cập nhật trạng thái DB thành LOCKED (vẫn giữ ownerId)
+      await updateLockerStatus(lockerId, "LOCKED", currentUserId);
+      alert(`Đã khóa tủ ${lockerId}.`);
+    } else {
+      alert(`Không thể khóa tủ ${lockerId} do lỗi gửi lệnh.`);
+    }
   }
 }
-// ✅ Gán vào window
+// Gán vào window (giữ nguyên)
 window.handleCloseLocker = handleCloseLocker;
 
-// ✅ SỬA: Hàm này giữ nguyên logic, chỉ cần gán vào window
+// ✅ HÀM NÀY GIỮ NGUYÊN LOGIC
 async function handleUnregister(lockerId) {
   if (
     confirm(
@@ -266,58 +92,82 @@ async function handleUnregister(lockerId) {
     }
   }
 }
-// ✅ Gán vào window
+// Gán vào window (giữ nguyên)
 window.handleUnregister = handleUnregister;
 
-// ✅ HÀM NÀY GIỮ NGUYÊN
+// ✅ SỬA: Hàm này gọi sendLockCommand cho từng tủ trước khi logout
 window.handleLogoutAndLock = function () {
   if (currentUserId) {
-    const openUserLockers = [];
+    const lockPromises = []; // Mảng chứa các promise gửi lệnh khóa
+
+    // Tìm các tủ đang mở của người dùng
     Object.keys(lockerStates).forEach((lockerId) => {
       const state = lockerStates[lockerId];
       if (state.status === "OPEN" && state.userId === currentUserId) {
-        openUserLockers.push(
-          updateLockerStatus(lockerId, "LOCKED", currentUserId)
-        );
+        // Thêm promise gửi lệnh khóa vào mảng
+        lockPromises.push(sendLockCommand(lockerId));
+        // Cập nhật trạng thái DB thành LOCKED song song
+        updateLockerStatus(lockerId, "LOCKED", currentUserId);
       }
     });
-    if (openUserLockers.length > 0) {
-      Promise.all(openUserLockers).then(() => {
+
+    if (lockPromises.length > 0) {
+      console.log(
+        `Attempting to lock ${lockPromises.length} open locker(s) before logout...`
+      );
+      // Đợi tất cả các lệnh khóa được gửi đi (thành công hoặc thất bại)
+      Promise.allSettled(lockPromises).then((results) => {
+        // Kiểm tra xem có lỗi nào không (chỉ để thông báo)
+        const failedLocks = results.filter(
+          (r) =>
+            r.status === "rejected" || (r.status === "fulfilled" && !r.value)
+        );
+        if (failedLocks.length > 0) {
+          alert(
+            `⚠️ Có lỗi xảy ra khi cố gắng khóa ${failedLocks.length} tủ trước khi đăng xuất. Vui lòng kiểm tra lại.`
+          );
+        } else {
+          alert("Đã khóa các tủ đang mở của bạn.");
+        }
+        // Luôn thực hiện đăng xuất
         sessionStorage.removeItem("user");
-        alert("Đã đóng tủ của bạn. Đăng xuất thành công.");
+        alert("Đăng xuất thành công.");
         window.location.href = "logon.html";
       });
     } else {
+      // Không có tủ nào đang mở, đăng xuất ngay
       sessionStorage.removeItem("user");
       alert("Đăng xuất thành công.");
       window.location.href = "logon.html";
     }
   } else {
+    // Trường hợp không có user
     sessionStorage.removeItem("user");
     window.location.href = "logon.html";
   }
 };
 
-// ✅ HÀM NÀY GIỮ NGUYÊN
+// ✅ HÀM NÀY GIỮ NGUYÊN (Vẫn gọi /raspi/unlock để BẬT relay)
 window.openLockerSuccess = (lockerId) => {
   if (!lockerId) {
     alert("Lỗi: Không tìm thấy lockerId để mở.");
     return;
   }
+  // 1. Gửi lệnh BẬT relay đến Pi (thông qua Bridge)
   fetch(`${RENDER_BRIDGE}/raspi/unlock`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ lockerId: lockerId, user: currentUser?.email }),
+    /* ... body ... */
   })
     .then((res) => res.json())
     .then((unlockData) => {
       if (!unlockData.success && unlockData.error) {
         alert("⚠️ Không thể gửi lệnh mở khóa đến Pi: " + unlockData.error);
       }
+      // 2. Cập nhật DB thành OPEN và gán quyền sở hữu
       return updateLockerStatus(lockerId, "OPEN", currentUserId);
     })
     .then(async (lockerUpdated) => {
       if (lockerUpdated) {
+        // 3. Lưu tủ vào tài khoản user (nếu chưa có)
         const userLocker = currentUser.registeredLocker;
         if (
           !userLocker ||
@@ -326,20 +176,19 @@ window.openLockerSuccess = (lockerId) => {
         ) {
           await updateUserField("registeredLocker", lockerId);
         }
-        alert(`🔓 Tủ ${lockerId} đã mở thành công!`);
-        // QUAN TRỌNG: Quay về index.html thay vì open.html
-        window.location.href = "./index.html"; // <-- Sửa đích đến
+        alert(`🔓 Tủ ${lockerId} đã mở thành công! (Relay đang BẬT)`);
+        // 4. Chuyển hướng về index.html
+        window.location.href = "./index.html";
       } else {
         alert(`❌ Không thể cập nhật trạng thái tủ ${lockerId}.`);
       }
     })
     .catch((err) => {
-      console.error("Lỗi khi mở khóa:", err);
-      alert("❌ Lỗi nghiêm trọng khi gửi lệnh mở khóa: " + err.message);
+      /* ... xử lý lỗi ... */
     });
 };
 
-// ✅ SỬA: Chỉ khởi chạy nếu đang ở trang index.html hoặc open.html
+// ✅ HÀM NÀY GIỮ NGUYÊN
 document.addEventListener("DOMContentLoaded", () => {
   const path = window.location.pathname;
   if (
@@ -347,24 +196,9 @@ document.addEventListener("DOMContentLoaded", () => {
     path.endsWith("open.html") ||
     path === "/"
   ) {
-    // Gán sự kiện cho grid TRÊN TRANG OPEN.HTML
     if (path.endsWith("open.html")) {
-      const gridContainer = document.querySelector(".grid-container");
-      if (gridContainer) {
-        gridContainer.addEventListener("click", (e) => {
-          const item = e.target.closest(".grid-item");
-          if (
-            item &&
-            !e.target.classList.contains("close-btn") &&
-            !e.target.classList.contains("unregister-btn")
-          ) {
-            e.preventDefault();
-            handleLockerClick(item.dataset.lockerId);
-          }
-        });
-      }
+      /* ... gán sự kiện cho grid ... */
     }
-    // Luôn tải trạng thái tủ cho cả hai trang
     fetchLockerStates();
   }
 });

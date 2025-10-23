@@ -398,12 +398,10 @@ app.get("/lockers/status", async (req, res) => {
       })),
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: "Lỗi khi tải trạng thái tủ: " + err.message,
-      });
+    res.status(500).json({
+      success: false,
+      error: "Lỗi khi tải trạng thái tủ: " + err.message,
+    });
   }
 });
 
@@ -458,12 +456,10 @@ app.post("/lockers/update", async (req, res) => {
     if (err instanceof mongoose.Error.CastError) {
       return res.status(400).json({ error: "Invalid owner ID format" });
     }
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: "Lỗi khi cập nhật trạng thái tủ: " + err.message,
-      });
+    res.status(500).json({
+      success: false,
+      error: "Lỗi khi cập nhật trạng thái tủ: " + err.message,
+    });
   }
 });
 
@@ -495,7 +491,7 @@ app.post("/raspi/capture", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-// ✅ ✅ ✅ THÊM ĐOẠN MÃ NÀY VÀO ✅ ✅ ✅
+
 // ENDPOINT MỚI: Gửi lệnh mở khóa vật lý
 app.post("/raspi/unlock", async (req, res) => {
   try {
@@ -512,7 +508,7 @@ app.post("/raspi/unlock", async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-// ✅ ✅ ✅ KẾT THÚC ĐOẠN MÃ CẦN THÊM ✅ ✅ ✅
+
 // ✅ ENDPOINT MỚI: Chụp 5 ảnh từ RasPi Cam
 app.post("/raspi/capture-batch", async (req, res) => {
   try {
@@ -637,7 +633,30 @@ app.post("/raspi/unlock", async (req, res) => {
     console.log("--- Finished processing /raspi/unlock ---");
   }
 });
-
+// ✅ ===== THÊM ENDPOINT MỚI: /raspi/lock =====
+app.post("/raspi/lock", async (req, res) => {
+  console.log("--- Received request at /raspi/lock ---"); // Log khi nhận request
+  console.log("Request body:", req.body); // Log nội dung request (sẽ chứa lockerId)
+  try {
+    // Chuyển tiếp (forward) request đến endpoint /lock trên Pi
+    console.log("Forwarding lock request to Pi:", RASPI_URL);
+    const r = await fetch(`${RASPI_URL}/lock`, {
+      // <-- Gọi endpoint /lock
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req.body), // Gửi thông tin (lockerId, user)
+    });
+    const data = await r.json();
+    console.log("Response from Pi:", data); // Log phản hồi từ Pi
+    res.json(data); // Gửi phản hồi từ Pi về lại cho client
+  } catch (err) {
+    console.error("❌ Error in /raspi/lock endpoint:", err);
+    res.status(500).json({ success: false, error: err.message });
+  } finally {
+    console.log("--- Finished processing /raspi/lock ---"); // Log khi kết thúc
+  }
+});
+// ✅ ===== KẾT THÚC ENDPOINT MỚI =====
 // ===== ENDPOINT LẤY LỊCH SỬ (✅ ĐÃ SỬA: CHUYỂN ID THÀNH OBJECTID) =====
 app.get("/history/:userId", async (req, res) => {
   try {
