@@ -1,4 +1,3 @@
-
 // backend/face_id.js - Dual Mode: Laptop (WebRTC) <-> RasPi (MJPEG)
 // TÍNH NĂNG MỚI: Chụp 5 ảnh/lần bấm nút và giới hạn 5 lần chụp thành công.
 
@@ -45,23 +44,81 @@ document.addEventListener("DOMContentLoaded", () => {
     updateCaptureStatus();
   }
 
-  // 1. Thiết lập giao diện và chế độ Camera
+  // // 1. Thiết lập giao diện và chế độ Camera
+  // function setupCameraInterface() {
+  //   const currentUrl = window.location.href;
+  //   // Thêm kiểm tra RASPI_NGROK vào isLocal để phân biệt RasPi chạy qua Ngrok
+  //   const isLocal =
+  //     LOCAL_IP_CHECK.some((ip) => currentUrl.includes(ip)) ||
+  //     currentUrl.includes(RASPI_NGROK);
+
+  //   if (isLocal) {
+  //     isRasPiMode = true;
+  //     console.log("Mode: Raspberry Pi Camera (Local/Ngrok)");
+
+  //     const img = document.createElement("img");
+  //     img.id = "cameraPreview";
+  //     // Sử dụng 127.0.0.1:5000 cho RasPi (vì request đến Render Bridge sẽ xử lý)
+  //     img.src = `${currentUrl.split(":")[0]}://127.0.0.1:5000/video_feed`;
+  //     img.alt = "Raspberry Pi Camera Preview";
+  //     img.style.maxWidth = "90%";
+  //     img.style.borderRadius = "10px";
+  //     img.style.border = "2px solid #1a73e8";
+  //     cameraWrapper.insertBefore(img, takeBtn);
+  //     if (captureCount < MAX_SUCCESS_CAPTURES) {
+  //       statusEl.textContent = "🎥 Live stream from Raspberry Pi";
+  //       statusEl.style.color = "#00ffff";
+  //     }
+  //   } else {
+  //     isRasPiMode = false;
+  //     console.log("Mode: Laptop Camera (Remote)");
+
+  //     const video = document.createElement("video");
+  //     video.id = "laptopCamera";
+  //     video.autoplay = true;
+  //     video.style.maxWidth = "90%";
+  //     video.style.borderRadius = "10px";
+  //     video.style.border = "2px solid #1a73e8";
+  //     cameraWrapper.insertBefore(video, takeBtn);
+  //     if (captureCount < MAX_SUCCESS_CAPTURES) {
+  //       startLaptopCamera(video);
+  //     }
+  //   }
+  // }
+
+  // --- CHỈNH SỬA: Phát hiện môi trường RasPi hoặc Laptop tự động ---
   function setupCameraInterface() {
     const currentUrl = window.location.href;
-    // Thêm kiểm tra RASPI_NGROK vào isLocal để phân biệt RasPi chạy qua Ngrok
-    const isLocal =
+    const ua = navigator.userAgent.toLowerCase();
+
+    // 🔍 Phát hiện RasPi theo user-agent
+    const isRasPiEnv =
+      ua.includes("arm") || ua.includes("aarch64") || ua.includes("raspbian");
+
+    // 🔍 Phát hiện local hoặc ngrok (đều xem là RasPi mode)
+    const isLocalNetwork =
       LOCAL_IP_CHECK.some((ip) => currentUrl.includes(ip)) ||
       currentUrl.includes(RASPI_NGROK);
 
-    if (isLocal) {
-      isRasPiMode = true;
-      console.log("Mode: Raspberry Pi Camera (Local/Ngrok)");
+    // ✅ Xác định chế độ cuối cùng
+    isRasPiMode = isRasPiEnv || isLocalNetwork;
 
+    console.log(
+      isRasPiMode
+        ? "🟢 RasPi Mode → Dùng camera Flask video_feed"
+        : "💻 Laptop Mode → Dùng webcam laptop"
+    );
+
+    // Xóa phần tử camera cũ (nếu có)
+    const oldEl = document.querySelector("#cameraPreview, #laptopCamera");
+    if (oldEl) oldEl.remove();
+
+    // 🚀 Tạo giao diện camera tương ứng
+    if (isRasPiMode) {
       const img = document.createElement("img");
       img.id = "cameraPreview";
-      // Sử dụng 127.0.0.1:5000 cho RasPi (vì request đến Render Bridge sẽ xử lý)
-      img.src = `${currentUrl.split(":")[0]}://127.0.0.1:5000/video_feed`;
       img.alt = "Raspberry Pi Camera Preview";
+      img.src = "http://127.0.0.1:5000/video_feed"; // Flask stream nội bộ
       img.style.maxWidth = "90%";
       img.style.borderRadius = "10px";
       img.style.border = "2px solid #1a73e8";
@@ -71,9 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
         statusEl.style.color = "#00ffff";
       }
     } else {
-      isRasPiMode = false;
-      console.log("Mode: Laptop Camera (Remote)");
-
       const video = document.createElement("video");
       video.id = "laptopCamera";
       video.autoplay = true;

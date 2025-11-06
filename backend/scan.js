@@ -29,21 +29,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Functions (setupCameraInterface, startLaptopCamera, pollRecognition) ---
   // These functions remain the same as the previous correct version
+  // function setupCameraInterface() {
+  //   const currentUrl = window.location.href;
+  //   const isLocal =
+  //     LOCAL_IP_CHECK.some((ip) => currentUrl.includes(ip)) ||
+  //     currentUrl.includes(RASPI_NGROK);
+  //   const oldEl = document.querySelector("#cameraPreview, #laptopCamera"); // Select both possible elements
+  //   if (oldEl) oldEl.remove();
+
+  //   if (isLocal) {
+  //     isRasPiMode = true;
+  //     console.log("Mode: Raspberry Pi Camera (Local/Ngrok)");
+  //     const img = document.createElement("img");
+  //     img.id = "cameraPreview";
+  //     img.alt = "Raspberry Pi Camera Preview";
+  //     img.src = `${currentUrl.split(":")[0]}://127.0.0.1:5000/video_feed`;
+  //     img.style.maxWidth = "90%";
+  //     img.style.borderRadius = "12px";
+  //     cameraWrapper.appendChild(img);
+  //     statusEl.textContent = "🎥 Live stream from Raspberry Pi";
+  //     statusEl.style.color = "#00ffff";
+  //     pollRecognition();
+  //   } else {
+  //     isRasPiMode = false;
+  //     console.log("Mode: Laptop Camera (Remote)");
+  //     const video = document.createElement("video");
+  //     video.id = "laptopCamera";
+  //     video.autoplay = true;
+  //     video.style.maxWidth = "90%";
+  //     video.style.borderRadius = "12px";
+  //     cameraWrapper.appendChild(video);
+  //     startLaptopCamera(video);
+  //   }
+  // }
+
+  // --- CHỈNH SỬA: Phát hiện môi trường RasPi hoặc Laptop tự động ---
   function setupCameraInterface() {
     const currentUrl = window.location.href;
-    const isLocal =
+    const ua = navigator.userAgent.toLowerCase();
+
+    // 🔍 Phát hiện xem đang chạy trên RasPi hay không
+    const isRasPiEnv =
+      ua.includes("arm") || ua.includes("aarch64") || ua.includes("raspbian");
+
+    // 🔍 Phát hiện khi đang mở nội bộ hoặc qua ngrok (cũng tính là RasPi)
+    const isLocalNetwork =
       LOCAL_IP_CHECK.some((ip) => currentUrl.includes(ip)) ||
       currentUrl.includes(RASPI_NGROK);
-    const oldEl = document.querySelector("#cameraPreview, #laptopCamera"); // Select both possible elements
+
+    // ✅ Xác định chế độ cuối cùng
+    isRasPiMode = isRasPiEnv || isLocalNetwork;
+
+    // 🔧 Xóa phần tử camera cũ (nếu có)
+    const oldEl = document.querySelector("#cameraPreview, #laptopCamera");
     if (oldEl) oldEl.remove();
 
-    if (isLocal) {
-      isRasPiMode = true;
-      console.log("Mode: Raspberry Pi Camera (Local/Ngrok)");
+    // 🚀 Tạo giao diện camera theo môi trường
+    if (isRasPiMode) {
+      console.log("🟢 RasPi Mode → Dùng camera Flask video_feed");
       const img = document.createElement("img");
       img.id = "cameraPreview";
       img.alt = "Raspberry Pi Camera Preview";
-      img.src = `${currentUrl.split(":")[0]}://127.0.0.1:5000/video_feed`;
+      img.src = "http://127.0.0.1:5000/video_feed"; // Giữ nguyên port bạn dùng cho Flask
       img.style.maxWidth = "90%";
       img.style.borderRadius = "12px";
       cameraWrapper.appendChild(img);
@@ -51,8 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
       statusEl.style.color = "#00ffff";
       pollRecognition();
     } else {
-      isRasPiMode = false;
-      console.log("Mode: Laptop Camera (Remote)");
+      console.log("💻 Laptop Mode → Dùng webcam laptop");
       const video = document.createElement("video");
       video.id = "laptopCamera";
       video.autoplay = true;
