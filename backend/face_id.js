@@ -91,16 +91,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentUrl = window.location.href;
     const ua = navigator.userAgent.toLowerCase();
 
-    // 🔍 Phát hiện RasPi theo user-agent
+    // 🔍 Phát hiện RasPi dựa vào user agent
     const isRasPiEnv =
       ua.includes("arm") || ua.includes("aarch64") || ua.includes("raspbian");
 
-    // 🔍 Phát hiện local hoặc ngrok (đều xem là RasPi mode)
+    // 🔍 Phát hiện local network hoặc ngrok
     const isLocalNetwork =
       LOCAL_IP_CHECK.some((ip) => currentUrl.includes(ip)) ||
       currentUrl.includes(RASPI_NGROK);
 
-    // ✅ Xác định chế độ cuối cùng
+    // ✅ Kết hợp 2 điều kiện
     isRasPiMode = isRasPiEnv || isLocalNetwork;
 
     console.log(
@@ -109,16 +109,14 @@ document.addEventListener("DOMContentLoaded", () => {
         : "💻 Laptop Mode → Dùng webcam laptop"
     );
 
-    // Xóa phần tử camera cũ (nếu có)
     const oldEl = document.querySelector("#cameraPreview, #laptopCamera");
     if (oldEl) oldEl.remove();
 
-    // 🚀 Tạo giao diện camera tương ứng
     if (isRasPiMode) {
       const img = document.createElement("img");
       img.id = "cameraPreview";
       img.alt = "Raspberry Pi Camera Preview";
-      img.src = "http://127.0.0.1:5000/video_feed"; // Flask stream nội bộ
+      img.src = "http://127.0.0.1:5000/video_feed"; // Giữ nguyên Flask stream
       img.style.maxWidth = "90%";
       img.style.borderRadius = "10px";
       img.style.border = "2px solid #1a73e8";

@@ -68,46 +68,55 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentUrl = window.location.href;
     const ua = navigator.userAgent.toLowerCase();
 
-    // 🔍 Phát hiện xem đang chạy trên RasPi hay không
+    // 🔍 Phát hiện RasPi dựa vào user agent
     const isRasPiEnv =
       ua.includes("arm") || ua.includes("aarch64") || ua.includes("raspbian");
 
-    // 🔍 Phát hiện khi đang mở nội bộ hoặc qua ngrok (cũng tính là RasPi)
+    // 🔍 Phát hiện local network hoặc ngrok
     const isLocalNetwork =
       LOCAL_IP_CHECK.some((ip) => currentUrl.includes(ip)) ||
       currentUrl.includes(RASPI_NGROK);
 
-    // ✅ Xác định chế độ cuối cùng
+    // ✅ Kết hợp 2 điều kiện
     isRasPiMode = isRasPiEnv || isLocalNetwork;
 
-    // 🔧 Xóa phần tử camera cũ (nếu có)
+    console.log(
+      isRasPiMode
+        ? "🟢 RasPi Mode → Dùng camera Flask video_feed"
+        : "💻 Laptop Mode → Dùng webcam laptop"
+    );
+
     const oldEl = document.querySelector("#cameraPreview, #laptopCamera");
     if (oldEl) oldEl.remove();
 
-    // 🚀 Tạo giao diện camera theo môi trường
     if (isRasPiMode) {
-      console.log("🟢 RasPi Mode → Dùng camera Flask video_feed");
       const img = document.createElement("img");
       img.id = "cameraPreview";
       img.alt = "Raspberry Pi Camera Preview";
-      img.src = "http://127.0.0.1:5000/video_feed"; // Giữ nguyên port bạn dùng cho Flask
+      img.src = "http://127.0.0.1:5000/video_feed"; // Giữ nguyên Flask stream
       img.style.maxWidth = "90%";
-      img.style.borderRadius = "12px";
-      cameraWrapper.appendChild(img);
-      statusEl.textContent = "🎥 Live stream from Raspberry Pi";
-      statusEl.style.color = "#00ffff";
-      pollRecognition();
+      img.style.borderRadius = "10px";
+      img.style.border = "2px solid #1a73e8";
+      cameraWrapper.insertBefore(img, takeBtn);
+      if (captureCount < MAX_SUCCESS_CAPTURES) {
+        statusEl.textContent = "🎥 Live stream from Raspberry Pi";
+        statusEl.style.color = "#00ffff";
+      }
     } else {
-      console.log("💻 Laptop Mode → Dùng webcam laptop");
       const video = document.createElement("video");
       video.id = "laptopCamera";
       video.autoplay = true;
       video.style.maxWidth = "90%";
-      video.style.borderRadius = "12px";
-      cameraWrapper.appendChild(video);
-      startLaptopCamera(video);
+      video.style.borderRadius = "10px";
+      video.style.border = "2px solid #1a73e8";
+      cameraWrapper.insertBefore(video, takeBtn);
+      if (captureCount < MAX_SUCCESS_CAPTURES) {
+        startLaptopCamera(video);
+      }
     }
   }
+
+  // 2. Kích hoạt camera Laptop (WebRTC)
 
   async function startLaptopCamera(videoEl) {
     try {
