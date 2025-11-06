@@ -29,91 +29,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Functions (setupCameraInterface, startLaptopCamera, pollRecognition) ---
   // These functions remain the same as the previous correct version
-  // function setupCameraInterface() {
-  //   const currentUrl = window.location.href;
-  //   const isLocal =
-  //     LOCAL_IP_CHECK.some((ip) => currentUrl.includes(ip)) ||
-  //     currentUrl.includes(RASPI_NGROK);
-  //   const oldEl = document.querySelector("#cameraPreview, #laptopCamera"); // Select both possible elements
-  //   if (oldEl) oldEl.remove();
-
-  //   if (isLocal) {
-  //     isRasPiMode = true;
-  //     console.log("Mode: Raspberry Pi Camera (Local/Ngrok)");
-  //     const img = document.createElement("img");
-  //     img.id = "cameraPreview";
-  //     img.alt = "Raspberry Pi Camera Preview";
-  //     img.src = `${currentUrl.split(":")[0]}://127.0.0.1:5000/video_feed`;
-  //     img.style.maxWidth = "90%";
-  //     img.style.borderRadius = "12px";
-  //     cameraWrapper.appendChild(img);
-  //     statusEl.textContent = "🎥 Live stream from Raspberry Pi";
-  //     statusEl.style.color = "#00ffff";
-  //     pollRecognition();
-  //   } else {
-  //     isRasPiMode = false;
-  //     console.log("Mode: Laptop Camera (Remote)");
-  //     const video = document.createElement("video");
-  //     video.id = "laptopCamera";
-  //     video.autoplay = true;
-  //     video.style.maxWidth = "90%";
-  //     video.style.borderRadius = "12px";
-  //     cameraWrapper.appendChild(video);
-  //     startLaptopCamera(video);
-  //   }
-  // }
-
-  // --- CHỈNH SỬA: Phát hiện môi trường RasPi hoặc Laptop tự động ---
   function setupCameraInterface() {
     const currentUrl = window.location.href;
-    const ua = navigator.userAgent.toLowerCase();
-
-    // 🔍 Phát hiện RasPi dựa vào user agent
-    const isRasPiEnv =
-      ua.includes("arm") || ua.includes("aarch64") || ua.includes("raspbian");
-
-    // 🔍 Phát hiện local network hoặc ngrok
-    const isLocalNetwork =
+    const isLocal =
       LOCAL_IP_CHECK.some((ip) => currentUrl.includes(ip)) ||
       currentUrl.includes(RASPI_NGROK);
-
-    // ✅ Kết hợp 2 điều kiện
-    isRasPiMode = isRasPiEnv || isLocalNetwork;
-
-    console.log(
-      isRasPiMode
-        ? "🟢 RasPi Mode → Dùng camera Flask video_feed"
-        : "💻 Laptop Mode → Dùng webcam laptop"
-    );
-
-    const oldEl = document.querySelector("#cameraPreview, #laptopCamera");
+    const oldEl = document.querySelector("#cameraPreview, #laptopCamera"); // Select both possible elements
     if (oldEl) oldEl.remove();
 
-    if (isRasPiMode) {
+    if (isLocal) {
+      isRasPiMode = true;
+      console.log("Mode: Raspberry Pi Camera (Local/Ngrok)");
       const img = document.createElement("img");
       img.id = "cameraPreview";
       img.alt = "Raspberry Pi Camera Preview";
-      // img.src = "http://127.0.0.1:5000/video_feed"; // Giữ nguyên Flask stream
-      img.src = `${RASPI_NGROK}/video_feed`;
+      img.src = `${currentUrl.split(":")[0]}://127.0.0.1:5000/video_feed`;
       img.style.maxWidth = "90%";
-      img.style.borderRadius = "10px";
-      img.style.border = "2px solid #1a73e8";
-      cameraWrapper.insertBefore(img, takeBtn);
-      if (captureCount < MAX_SUCCESS_CAPTURES) {
-        statusEl.textContent = "🎥 Live stream from Raspberry Pi";
-        statusEl.style.color = "#00ffff";
-      }
+      img.style.borderRadius = "12px";
+      cameraWrapper.appendChild(img);
+      statusEl.textContent = "🎥 Live stream from Raspberry Pi";
+      statusEl.style.color = "#00ffff";
+      pollRecognition();
     } else {
+      isRasPiMode = false;
+      console.log("Mode: Laptop Camera (Remote)");
       const video = document.createElement("video");
       video.id = "laptopCamera";
       video.autoplay = true;
       video.style.maxWidth = "90%";
-      video.style.borderRadius = "10px";
-      video.style.border = "2px solid #1a73e8";
-      cameraWrapper.insertBefore(video, takeBtn);
-      if (captureCount < MAX_SUCCESS_CAPTURES) {
-        startLaptopCamera(video);
-      }
+      video.style.borderRadius = "12px";
+      cameraWrapper.appendChild(video);
+      startLaptopCamera(video);
     }
   }
 
