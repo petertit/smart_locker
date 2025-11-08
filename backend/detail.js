@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const passwordEl = document.getElementById("password");
   const hintEl = document.getElementById("hint");
   const lockerCodeEl = document.getElementById("lockerCode");
-  const registeredLockerEl = document.getElementById("registeredLocker"); // <-- Thêm dòng này
+  const registeredLockerEl = document.getElementById("registeredLocker");
 
   const changeBtn = document.getElementById("change-btn");
   const saveBtn = document.getElementById("save-btn");
@@ -45,12 +45,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (lockerCodeEl)
     lockerCodeEl.textContent = user.lockerCode || "Chưa thiết lập";
   if (registeredLockerEl)
-    // <-- Thêm khối if này
     registeredLockerEl.textContent = user.registeredLocker || "Chưa đăng ký tủ";
 
   // ✅ CHO PHÉP CHỈNH SỬA ELEMENT MỚI
   changeBtn.addEventListener("click", () => {
-    // Thêm registeredLockerEl vào danh sách
     [
       nameEl,
       emailEl,
@@ -79,7 +77,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       lockerCode: lockerCodeEl
         ? lockerCodeEl.textContent.trim()
         : user.lockerCode,
-      // Thêm dòng này để đọc giá trị mới
       registeredLocker: registeredLockerEl
         ? registeredLockerEl.textContent.trim()
         : user.registeredLocker,
@@ -89,14 +86,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       const res = await fetch("https://smart-locker-kgnx.onrender.com/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: user.id, ...newData }), // Gửi tất cả dữ liệu mới
+        body: JSON.stringify({ id: user.id, ...newData }),
       });
 
       const data = await res.json();
       if (res.ok && data.user) {
         alert("✅ Cập nhật thành công!");
         sessionStorage.setItem("user", JSON.stringify(data.user));
-        // Thêm registeredLockerEl vào danh sách
         [
           nameEl,
           emailEl,

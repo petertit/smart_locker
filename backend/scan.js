@@ -28,13 +28,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // --- Functions (setupCameraInterface, startLaptopCamera, pollRecognition) ---
-  // These functions remain the same as the previous correct version
   function setupCameraInterface() {
     const currentUrl = window.location.href;
     const isLocal =
       LOCAL_IP_CHECK.some((ip) => currentUrl.includes(ip)) ||
       currentUrl.includes(RASPI_NGROK);
-    const oldEl = document.querySelector("#cameraPreview, #laptopCamera"); // Select both possible elements
+    const oldEl = document.querySelector("#cameraPreview, #laptopCamera");
     if (oldEl) oldEl.remove();
 
     if (isLocal) {
@@ -83,21 +82,18 @@ document.addEventListener("DOMContentLoaded", () => {
     if (recognitionInterval) {
       clearTimeout(recognitionInterval);
       recognitionInterval = null;
-    } // Clear previous timer if any
+    }
 
     let endpoint = `${BRIDGE_SERVER}/recognize`;
     let method = "GET";
     let payload = {};
-
-    // Prepare request based on mode
     if (!isRasPiMode) {
-      // Laptop Mode
       if (
         !mediaStream ||
         !document.querySelector("#laptopCamera")?.videoWidth
       ) {
         console.log("Laptop camera stream not ready, retrying poll...");
-        recognitionInterval = setTimeout(pollRecognition, 2000); // Retry sooner if stream isn't ready
+        recognitionInterval = setTimeout(pollRecognition, 2000);
         return;
       }
       const videoEl = document.querySelector("#laptopCamera");
@@ -114,12 +110,9 @@ document.addEventListener("DOMContentLoaded", () => {
       statusEl.textContent = "🔄 Sending frame...";
       statusEl.style.color = "#ffaa00";
     } else {
-      // RasPi Mode
       statusEl.textContent = "🔄 Requesting recognition...";
       statusEl.style.color = "#ffaa00";
     }
-
-    // Send request
     try {
       const res = await fetch(endpoint, {
         method: method,
@@ -132,17 +125,13 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Recognition polling error:", err);
       statusEl.textContent = "⚠️ Lỗi kết nối nhận diện";
       statusEl.style.color = "#ffaa00";
-      // Retry after 3 seconds on network error
       recognitionInterval = setTimeout(pollRecognition, 3000);
     }
   }
-  // --- End unchanged functions ---
 
   // 4. Xử lý kết quả nhận diện (ADDED DEBUG LOGS)
   function handleRecognitionResult(data) {
-    console.log("Recognition result received:", data); // Log the raw result
-
-    // Check if recognition was successful AND matches the current user
+    console.log("Recognition result received:", data);
     if (
       data.success &&
       data.name &&

@@ -1,26 +1,3 @@
-// // menu.js
-// document.addEventListener("DOMContentLoaded", () => {
-//   const userRaw = sessionStorage.getItem("user");
-//   const formContainer = document.querySelector(".form-container");
-//   if (!formContainer) return;
-
-//   if (userRaw) {
-//     const user = JSON.parse(userRaw);
-//     formContainer.innerHTML = `
-//       <h1 class="headline">Welcome to SMART BOX</h1>
-//       <p class="subheadline">${user.username || user.email}</p>
-//       <div class="button-group">
-//         <button id="logout-btn" class="logout-btn">Log Out</button>
-//       </div>
-//     `;
-
-//     document.getElementById("logout-btn").addEventListener("click", () => {
-//       sessionStorage.removeItem("user");
-//       window.location.href = "logon.html";
-//     });
-//   }
-// });
-
 // menu.js
 document.addEventListener("DOMContentLoaded", () => {
   const userRaw = sessionStorage.getItem("user");
@@ -38,12 +15,10 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
-    // Nút Detail → chuyển đến trang detail.html
     document.getElementById("detail-btn").addEventListener("click", () => {
       window.location.href = "detail.html";
     });
 
-    // Nút Log Out → xóa session
     document.getElementById("logout-btn").addEventListener("click", () => {
       sessionStorage.removeItem("user");
       window.location.href = "logon.html";
