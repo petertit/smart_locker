@@ -1,6 +1,0 @@
-Css:
-crop ảnh : 
-  max-width: 470px;
-  height: 685px;
-  object-fit: cover;
-  object-position: 80% 0%;

@@ -6,10 +6,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!historyList) return;
 
-  // ✅ SỬA LỖI: Sử dụng server Render
+  // ✅  Sử dụng server Render
   const BASE_URL = "https://smart-locker-kgnx.onrender.com";
 
-  // ✅ SỬA LỖI: Lấy thông tin người dùng từ sessionStorage
+  // ✅  Lấy thông tin người dùng từ sessionStorage
   const userRaw = sessionStorage.getItem("user");
   const user = userRaw ? JSON.parse(userRaw) : null;
 
@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
   historyLockerName.textContent = user.name + " History";
 
   async function fetchLockerHistory() {
-    // ✅ SỬA LỖI: Gọi đến endpoint mới bằng User ID
+    // ✅  Gọi đến endpoint mới bằng User ID
     const HISTORY_URL = `${BASE_URL}/history/${user.id}`;
 
     try {
@@ -60,34 +60,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let actionText = "";
       let color = "";
-
       // ✅ Cập nhật: Thêm Locker ID vào
       const lockerIdText = item.lockerId ? ` (Tủ ${item.lockerId})` : "";
 
       switch (item.action) {
         case "OPENED":
           actionText = "ĐÃ MỞ KHÓA" + lockerIdText;
-          color = "#00aa00"; // Xanh lá
+          color = "#00aa00";
           break;
         case "LOCKED":
           actionText = "ĐÃ ĐÓNG KHÓA" + lockerIdText;
-          color = "#cc0000"; // Đỏ
+          color = "#cc0000";
           break;
         case "REGISTERED":
           actionText = "ĐĂNG KÝ TÀI KHOẢN";
-          color = "#1a73e8"; // Xanh dương
+          color = "#1a73e8";
           break;
         default:
           actionText = item.action;
           color = "#aaa";
       }
-
-      // Sử dụng class từ HTML
       li.innerHTML = `
                 <span class="history-list-span-action" style="color: ${color};">${actionText}</span>
                 <span class="history-list-span-date">${formattedDate}</span>
             `;
-      // Thêm viền màu
       li.style.borderLeft = `5px solid ${color}`;
 
       historyList.appendChild(li);

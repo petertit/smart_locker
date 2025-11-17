@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const input = document.getElementById("lockerCode");
   const row3 = document.getElementById("row3");
 
-  // Lấy lockerId mà người dùng đã chọn ở trang open.html
   const lockerId = sessionStorage.getItem("locker_to_open");
   if (!lockerId) {
     alert("Lỗi: Không tìm thấy tủ nào đang chờ mở. Đang quay lại...");
@@ -28,7 +27,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // So sánh mã đã nhập với mã của người dùng
     if (entered === user.lockerCode) {
       row3.textContent = "✅ Mã chính xác — Đang gửi lệnh mở tủ...";
       row3.style.color = "#00ff66";
