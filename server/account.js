@@ -186,10 +186,44 @@ const lockerStateSchema = new mongoose.Schema(
 const LockerState = mongoose.model("LockerState", lockerStateSchema);
 
 // Endpoint 1: Lấy trạng thái tất cả tủ (EXISTING)
+// app.get("/lockers/status", async (req, res) => {
+//   try {
+//     const allLockers = await LockerState.find().lean();
+//     for (let i = 1; i <= 9; i++) {
+//       const id = i.toString().padStart(2, "0");
+//       const exists = allLockers.find((l) => l.lockerId === id);
+//       if (!exists) {
+//         await LockerState.updateOne(
+//           { lockerId: id },
+//           { $setOnInsert: { lockerId: id, status: "EMPTY", ownerId: null } },
+//           { upsert: true }
+//         );
+//       }
+//     }
+//     const finalLockers = await LockerState.find().lean();
+//     res.json({
+//       success: true,
+//       // Sửa: Chuyển đổi ownerId ObjectId thành string trước khi gửi về client
+//       lockers: finalLockers.map((l) => ({
+//         lockerId: l.lockerId,
+//         status: l.status,
+//         ownerId: l.ownerId ? l.ownerId.toString() : null,
+//       })),
+//     });
+//   } catch (err) {
+//     res.status(500).json({
+//       success: false,
+//       error: "Lỗi khi tải trạng thái tủ: " + err.message,
+//     });
+//   }
+// });
+// Endpoint 1: Lấy trạng thái tất cả tủ (CHỈ 6 TỦ: 01–06)
 app.get("/lockers/status", async (req, res) => {
   try {
     const allLockers = await LockerState.find().lean();
-    for (let i = 1; i <= 9; i++) {
+
+    // Khởi tạo lockerId "01" → "06"
+    for (let i = 1; i <= 6; i++) {
       const id = i.toString().padStart(2, "0");
       const exists = allLockers.find((l) => l.lockerId === id);
       if (!exists) {
@@ -200,10 +234,10 @@ app.get("/lockers/status", async (req, res) => {
         );
       }
     }
+
     const finalLockers = await LockerState.find().lean();
     res.json({
       success: true,
-      // Sửa: Chuyển đổi ownerId ObjectId thành string trước khi gửi về client
       lockers: finalLockers.map((l) => ({
         lockerId: l.lockerId,
         status: l.status,
