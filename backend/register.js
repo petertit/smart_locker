@@ -101,17 +101,15 @@ document.addEventListener("DOMContentLoaded", () => {
       );
 
       const data = await res.json();
+
       if (res.ok && data.user) {
-        alert("✅ Registration successful!");
-        const user = {
-          _id: data.user._id,
-          name: data.user.name,
-          email: data.user.email,
-          phone: data.user.phone,
-          password: data.user.password,
-          hint: data.user.hint,
-        };
-        sessionStorage.setItem("user", JSON.stringify(user));
+        alert("✅ Registration successful! Please log in to continue.");
+
+        // ✅ KHÔNG lưu session khi register
+        sessionStorage.removeItem("user");
+        sessionStorage.removeItem("locker_to_open");
+
+        // ✅ Chuyển về trang đăng nhập
         window.location.href = "logon.html";
       } else {
         alert("❌ " + (data.error || "Register failed"));
