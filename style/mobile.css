@@ -1,0 +1,246 @@
+/* =========================================
+   F-LOCK Mobile Responsive (<= 768px)
+   Add after existing CSS files
+   ========================================= */
+
+/* Safe defaults */
+:root {
+  --mobile-gap: 12px;
+  --mobile-radius: 16px;
+  --mobile-font: 14px;
+  --mobile-title: 18px;
+}
+
+/* Prevent horizontal scroll */
+html,
+body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Tap-friendly */
+button,
+a,
+input,
+select {
+  touch-action: manipulation;
+}
+
+/* Images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Common container normalization */
+.container,
+.wrapper,
+.main,
+.content,
+.page,
+section {
+  max-width: 100%;
+}
+
+/* ======= MOBILE BREAKPOINT ======= */
+@media (max-width: 768px) {
+  /* Global font scale */
+  body {
+    font-size: var(--mobile-font);
+    line-height: 1.4;
+  }
+
+  h1,
+  .title,
+  .page-title {
+    font-size: 22px;
+  }
+  h2 {
+    font-size: var(--mobile-title);
+  }
+
+  /* Reduce paddings */
+  header,
+  .header,
+  .main-header {
+    padding: 10px 12px !important;
+  }
+  main,
+  .main,
+  .content,
+  .container,
+  section {
+    padding: 12px !important;
+  }
+
+  /* Buttons & inputs bigger */
+  button,
+  .btn,
+  .button,
+  a.button {
+    min-height: 44px;
+    padding: 10px 14px !important;
+    border-radius: 12px !important;
+  }
+
+  input,
+  textarea,
+  select {
+    min-height: 44px;
+    padding: 10px 12px !important;
+    border-radius: 12px !important;
+    font-size: 16px; /* iOS zoom fix */
+  }
+
+  /* ======= NAV / HEADER ======= */
+  .nav,
+  nav,
+  .navbar {
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+  }
+
+  /* If you have a header menu button */
+  .hamburger,
+  .menu-toggle {
+    display: inline-flex !important;
+  }
+
+  /* ======= INDEX PAGE: SLIDER ======= */
+  .location-slider,
+  .slider-viewport,
+  .slider-track {
+    width: 100% !important;
+  }
+
+  /* Make slides bigger and scroll-friendly */
+  .slider-viewport {
+    overflow: hidden !important;
+  }
+
+  .slider-track {
+    gap: 12px !important;
+  }
+
+  .slide {
+    min-width: 78% !important; /* show 1 big card + peek */
+    border-radius: var(--mobile-radius) !important;
+  }
+
+  .slide .overlay h2 {
+    font-size: 22px !important;
+  }
+
+  .slider-controls {
+    display: none !important; /* optional: hide arrows on mobile */
+  }
+
+  /* ======= OPEN PAGE: LOCKER GRID ======= */
+  .grid-container {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: var(--mobile-gap) !important;
+    padding: 0 !important;
+  }
+
+  .grid-item {
+    border-radius: var(--mobile-radius) !important;
+    min-height: 92px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+  }
+
+  .grid-item span {
+    font-size: 22px !important;
+    font-weight: 700 !important;
+  }
+
+  /* Hover buttons become always accessible on mobile */
+  .grid-item .close-btn,
+  .grid-item .unregister-btn {
+    position: absolute !important;
+    bottom: 10px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: calc(100% - 20px) !important;
+    max-width: 180px !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* ======= LOGIN / REGISTER ======= */
+  .auth-card,
+  .login-card,
+  .register-card,
+  .form-card {
+    width: 100% !important;
+    max-width: 420px !important;
+    margin: 0 auto !important;
+    border-radius: var(--mobile-radius) !important;
+    padding: 14px !important;
+  }
+
+  .form-row {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  /* ======= SCAN / FACE PAGES ======= */
+  .camera-box,
+  .video-box,
+  .preview-box,
+  .scan-box {
+    width: 100% !important;
+    border-radius: var(--mobile-radius) !important;
+  }
+
+  video,
+  canvas {
+    width: 100% !important;
+    height: auto !important;
+    border-radius: var(--mobile-radius) !important;
+  }
+
+  /* Make action buttons stick to bottom for easy tapping */
+  .actions,
+  .button-row,
+  .scan-actions {
+    position: sticky !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.6) !important; /* nếu nền tối */
+    backdrop-filter: blur(10px);
+    padding: 10px 12px !important;
+    display: flex !important;
+    gap: 10px !important;
+    justify-content: center !important;
+    z-index: 20 !important;
+  }
+
+  /* ======= TABLES / HISTORY ======= */
+  table {
+    width: 100% !important;
+    display: block !important;
+    overflow-x: auto !important;
+    border-radius: var(--mobile-radius) !important;
+  }
+
+  /* ======= FOOTER ======= */
+  footer,
+  .footer,
+  .main-footer {
+    padding: 14px 12px !important;
+    text-align: center !important;
+  }
+}
+
+/* ======= SMALL PHONES (<= 390px) ======= */
+@media (max-width: 390px) {
+  .grid-container {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .slide {
+    min-width: 88% !important;
+  }
+}
