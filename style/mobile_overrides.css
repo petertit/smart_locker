@@ -1,0 +1,169 @@
+/* =====================================================
+   F-LOCK MOBILE FIX
+   Philosophy:
+   - NO scale / NO zoom
+   - Shrink EACH component
+   - Fit phone screens cleanly
+   ===================================================== */
+
+@media (max-width: 768px) {
+  /* ===== GLOBAL ===== */
+  body {
+    padding: 12px !important;
+  }
+
+  h1 {
+    font-size: 28px !important;
+    line-height: 1.15 !important;
+  }
+
+  h2 {
+    font-size: 20px !important;
+  }
+
+  p {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+  }
+
+  /* =================================================
+     MENU PAGE (menu.html)
+     ================================================= */
+  body.page-menu .container {
+    flex-direction: column !important;
+    min-height: auto !important;
+  }
+
+  body.page-menu .left-side {
+    width: 100% !important;
+    padding: 24px 16px !important;
+  }
+
+  body.page-menu .logo {
+    font-size: 28px !important;
+    margin-bottom: 24px !important;
+  }
+
+  body.page-menu .footer-nav {
+    margin-top: 20px !important;
+    gap: 12px !important;
+  }
+
+  body.page-menu .footer-nav a {
+    font-size: 16px !important;
+  }
+
+  body.page-menu .right-side .form-container {
+    width: 100% !important;
+    padding: 24px 16px !important;
+    margin-top: 0 !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  body.page-menu .headline {
+    font-size: 14px !important;
+  }
+
+  body.page-menu .subheadline {
+    font-size: 22px !important;
+    line-height: 1.2 !important;
+  }
+
+  body.page-menu .button-group {
+    gap: 16px !important;
+    margin-top: 20px !important;
+  }
+
+  body.page-menu .signup-btn,
+  body.page-menu .signin-btn {
+    font-size: 15px !important;
+    padding: 10px 18px !important;
+    border-radius: 16px !important;
+  }
+
+  /* nút X */
+  body.page-menu .out {
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+  }
+
+  /* =================================================
+     REGISTER PAGE (register.html)
+     ================================================= */
+  body.page-register .menu {
+    margin-top: 12px !important;
+  }
+
+  body.page-register .header {
+    padding: 16px 12px !important;
+  }
+
+  body.page-register #row1 {
+    font-size: 12px !important;
+  }
+
+  body.page-register .header h1 {
+    font-size: 28px !important;
+    line-height: 1.15 !important;
+  }
+
+  body.page-register #row3 {
+    font-size: 14px !important;
+  }
+
+  body.page-register .register-container {
+    flex-direction: column !important;
+    margin: 16px auto !important;
+  }
+
+  body.page-register .left-side {
+    padding: 16px !important;
+  }
+
+  body.page-register .left-side img {
+    max-width: 260px !important;
+  }
+
+  body.page-register .right-side {
+    padding: 16px !important;
+  }
+
+  body.page-register .form-row {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  body.page-register label {
+    font-size: 12px !important;
+  }
+
+  body.page-register input {
+    font-size: 15px !important;
+    padding: 10px !important;
+  }
+
+  body.page-register .btn {
+    width: 100% !important;
+    font-size: 15px !important;
+    padding: 12px !important;
+  }
+
+  body.page-register .login-hint {
+    font-size: 13px !important;
+  }
+
+  /* CAPTCHA */
+  body.page-register #captchaCanvas {
+    width: 150px !important;
+    height: 52px !important;
+  }
+}
+
+/* Extra small phones */
+@media (max-width: 390px) {
+  h1 {
+    font-size: 24px !important;
+  }
+}
