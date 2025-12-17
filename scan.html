@@ -46,15 +46,38 @@
       <p id="row3">Look at the camera to unlock your locker</p>
     </div>
 
-    <!-- Video / Image Stream -->
+    <!-- Video / Camera Stream -->
     <div class="face-scan-wrapper" style="text-align: center">
-      <!-- 👇 Thay video bằng img để nhận luồng MJPEG -->
+      <!-- Raspberry Pi stream (img) -->
       <img
-        id="cameraPreview"
-        src=""
-        alt="Camera Stream"
-        style="max-width: 90%; border-radius: 12px"
+        id="raspiCamera"
+        style="display: none; max-width: 90%; border-radius: 12px"
+        alt="Raspberry Pi Camera"
       />
+
+      <!-- Laptop / Phone camera -->
+      <video
+        id="userCamera"
+        autoplay
+        playsinline
+        muted
+        style="display: none; max-width: 90%; border-radius: 12px"
+      ></video>
+
+      <!-- Controls (mobile needs user gesture) -->
+      <div
+        id="cameraControls"
+        style="
+          margin-top: 12px;
+          display: none;
+          gap: 10px;
+          justify-content: center;
+          flex-wrap: wrap;
+        "
+      >
+        <button id="btnStartCam">Bật camera</button>
+        <button id="btnSwitchCam">Đổi cam</button>
+      </div>
     </div>
 
     <!-- Status -->
