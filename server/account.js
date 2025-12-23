@@ -184,39 +184,6 @@ const lockerStateSchema = new mongoose.Schema(
   { collection: "locker_states" }
 );
 const LockerState = mongoose.model("LockerState", lockerStateSchema);
-
-// Endpoint 1: Lấy trạng thái tất cả tủ (EXISTING)
-// app.get("/lockers/status", async (req, res) => {
-//   try {
-//     const allLockers = await LockerState.find().lean();
-//     for (let i = 1; i <= 9; i++) {
-//       const id = i.toString().padStart(2, "0");
-//       const exists = allLockers.find((l) => l.lockerId === id);
-//       if (!exists) {
-//         await LockerState.updateOne(
-//           { lockerId: id },
-//           { $setOnInsert: { lockerId: id, status: "EMPTY", ownerId: null } },
-//           { upsert: true }
-//         );
-//       }
-//     }
-//     const finalLockers = await LockerState.find().lean();
-//     res.json({
-//       success: true,
-//       // Sửa: Chuyển đổi ownerId ObjectId thành string trước khi gửi về client
-//       lockers: finalLockers.map((l) => ({
-//         lockerId: l.lockerId,
-//         status: l.status,
-//         ownerId: l.ownerId ? l.ownerId.toString() : null,
-//       })),
-//     });
-//   } catch (err) {
-//     res.status(500).json({
-//       success: false,
-//       error: "Lỗi khi tải trạng thái tủ: " + err.message,
-//     });
-//   }
-// });
 // Endpoint 1: Lấy trạng thái tất cả tủ (CHỈ 6 TỦ: 01–06)
 app.get("/lockers/status", async (req, res) => {
   try {
@@ -335,23 +302,6 @@ app.post("/raspi/capture", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-// // ENDPOINT MỚI: Gửi lệnh mở khóa vật lý
-// app.post("/raspi/unlock", async (req, res) => {
-//   try {
-//     // Chuyển tiếp (forward) request đến RASPI_URL
-//     const r = await fetch(`${RASPI_URL}/unlock`, {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify(req.body), // Gửi thông tin (lockerId, user)
-//     });
-//     const data = await r.json();
-//     res.json(data); // Gửi phản hồi từ Pi về lại cho client
-//   } catch (err) {
-//     // Nếu Pi bị lỗi hoặc offline, vẫn trả về JSON
-//     res.status(500).json({ success: false, error: err.message });
-//   }
-// });
 
 // ✅ ENDPOINT MỚI: Chụp 5 ảnh từ RasPi Cam
 app.post("/raspi/capture-batch", async (req, res) => {
